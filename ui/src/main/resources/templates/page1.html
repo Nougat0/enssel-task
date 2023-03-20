@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/default}">
+
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+</head>
+
+<body>
+	<div layout:fragment="content">
+		<div class="content container-fluid">
+			<div>사용자 페이지</div>
+			<div class="box">
+				<div class="box-header with-bordered">
+					<button class="btn btn-primary" id="viewTable">조회</button>
+					<button class="btn btn-warning" id="addRecord">등록</button>
+					<button class="btn btn-warning" id="updateRecord">수정</button>
+					<button class="btn btn-warning" id="deleteRecord">삭제</button>
+				</div>
+				<hr />
+				<div class="box-body">
+					<h2>TEST_NOUGAT0 테이블 조회</h2>
+					<div id="gridContainer"></div>
+				</div>
+				</hr>
+			</div>
+			<!--addRecordModal 시작-->
+			<div class="modal" id="addRecordModal">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<!-- Modal Header -->
+						<div class="modal-header">
+							<h4 class="modal-title">회원 입력</h4>
+						</div>
+						<!-- Modal body -->
+						<div class="modal-body">
+							<form id="addRecordForm" action="/page1/regi" method="post">
+								<label>이름:</label>
+								<input type="text" class="form-control userNm" placeholder="이름을 입력하세요" name="userNm">
+								<br />
+								<label>아이디:</label>
+								<input type="text" class="form-control userId" placeholder="아이디를 입력하세요" name="userId">
+								<br />
+								<label>비밀번호:</label>
+								<input type="password" class="form-control pw" placeholder="비밀번호를 입력하세요" name="pw">
+								<br />
+								<label>비밀번호 확인:</label>
+								<input type="password" class="form-control pw2" placeholder="비밀번호를 한 번 더 입력하세요">
+								<br />
+								<label>등록자 아이디:</label>
+								<input type="text" class="form-control regiUser" placeholder="등록자의 아이디를 입력하세요"
+									name="regiUser">
+							</form>
+						</div>
+						<!-- Modal footer -->
+						<div class="modal-footer">
+							<button type="submit" id="addSubmitBtn" class="btn btn-info ">저장</button>
+							<button type="button" id="addCloseBtn" class="btn btn-danger "
+								data-dismiss="modal">닫기</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--addRecordModal 끝-->
+			<!--updateRecordModal 시작-->
+			<div class="modal" id="updateRecordModal">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<!-- Modal Header -->
+						<div class="modal-header">
+							<h4 class="modal-title">회원 수정</h4>
+						</div>
+						<!-- Modal body -->
+						<div class="modal-body">
+							<form id="updateRecordForm" action="/page1/update" method="post">
+								<label>이름:</label>
+								<input type="text" class="form-control userNm" placeholder="이름을 입력하세요" name="userNm">
+								<br />
+								<label>아이디:</label>
+								<input type="text" class="form-control userId" placeholder="아이디를 입력하세요" name="userIdAfter">
+								<br />
+								<label>비밀번호:</label>
+								<input type="password" class="form-control pw" placeholder="비밀번호를 입력하세요" name="pw">
+								<br />
+								<label>비밀번호 확인:</label>
+								<input type="password" class="form-control pw2" placeholder="비밀번호를 한 번 더 입력하세요">
+								<br />
+								<label>수정한 자 아이디:</label>
+								<input type="text" class="form-control regiUser" placeholder="등록자의 아이디를 입력하세요"
+									name="updaUser">
+								<input type="hidden" class="form-control userId" name="userIdBefore">
+							</form>
+						</div>
+						<!-- Modal footer -->
+						<div class="modal-footer">
+							<button type="submit" id="updateSubmitBtn" class="btn btn-info ">저장</button>
+							<button type="button" id="updateCloseBtn" class="btn btn-danger "
+								data-dismiss="modal">취소</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--updateRecordModal 끝-->
+		</div>
+	</div>
+	<th:block layout:fragment="script">
+		<script type="text/javascript">
+			$(function () {
+				//multiple select 전용 변수
+				let selectedRows;
+
+				// 🔔 Spring 과제 2차 🔔
+				var GRID = { //grid 를 만드는 데 필요한 속성들 정의
+					columns: [{
+						dataField: "regiDt"
+						, caption: "등록일"
+						, dataType: "date"
+						, format: "yyyy-MM-dd"
+					}, {
+						dataField: "regiUser"
+						, caption: "등록자 아이디"
+						//dataType: "text"
+						//데이터 타입 디폴트는 text, 이 경우에는 명시 안해줘도 됨
+						, validationRules: [{ type: "required" }]
+					}, {
+						dataField: "userNm"
+						, caption: "이름"
+						, validationRules: [{ type: "required" }]
+					}, {
+						dataField: "userId"
+						, caption: "아이디"
+						, fixed: true //엑셀에서 n열까지 고정 기능과 유사. 가로 스크롤이 생길 시 해당 컬럼을 고정해서 항상 보이게 함.
+						, sortOrder: "asc" //내림차순 정렬
+						, validationRules: [{ type: "required" }]
+					}, {
+						dataField: "pw"
+						, caption: "비밀번호"
+						, visible: false
+						, validationRules: [{ type: "required" }]
+					}, {
+						dataField: "updaDt"
+						, caption: "수정일"
+						, dataType: "date"
+						, format: "yyyy-MM-dd"
+					}, {
+						dataField: "updaUser"
+						, caption: "수정자 아이디"  //dataField 외에 명시할 속성이 없다면 중괄호 없이 그냥 "컬럼명" 만 추가해도 됨.
+					}]
+					, makeGrid: function (data) {
+						var grid = $('#gridContainer').dxDataGrid({
+							dataSource: data //array 전달, 함수 넣어도 됨 (return 값 전달)
+							, keyExpr: "userId" //pk의 필드명 넘기기
+							// array 외의 데이터를 넘기고 싶을 경우(JSON) Docs 참고
+							, columns: GRID.columns//사용하는 컬럼정보 배열로 넘기기 [{컬럼1정보},{컬럼2정보},{컬럼3정보}]
+							, noDataText: "데이터가🔔없습니다"
+							, allowColumnResizing: true
+							, columnAutoWith: true
+							, columnFixing: { enabled: true }
+							, sorting: { mode: "single" } //정렬 옵션을 단일정렬만 하기. (다중 정렬x)
+							, searchPanel: {
+								visible: true
+								, placeholder: "검색"
+							} //검색창 추가
+							, selection: { mode: "multiple" } //다중 선택 옵션 on
+							, onSelectionChanged: function (e) {
+								selectedRows = e;
+							}
+							, toolbar: {
+								items: [
+									"searchPanel"
+								]
+							}
+						}).dxDataGrid("instance"); // instance 가져와서 담기
+						return grid;
+					}
+					, loadDataSource: function () {
+						
+						$.ajax({
+							url: '/page1/table',
+							dataType: 'json',
+							contentType: "application/json; charset=UTF-8",
+							success: function (data, status, xhr) {
+								GRID.makeGrid(data);
+								//console.log('data.Columns: ' + data.Columns);
+								//console.log('GRID.Columns: ' + GRID.Columns);
+								//alert('ajax로 새로 데이터를 받아왔어요');
+							},
+							error: function (request, status, error) {
+								alert('데이터 로드중 오류 발생');
+								console.log('request.status: ' + request.status + 'status: ' + status + 'error: ' + error);
+							}
+						});
+						//console.log('ajax로 새로 데이터를 받아왔어요');
+					}
+				}///GRID
+
+				var GRID_CRUD_SUBMIT = {
+					addMember: function (form) {
+						//ajax로 db에 데이터 입력 요청
+						$.ajax({
+							url: '/page1/regi',
+							type: 'post',
+							data: form, //form태그에 serialize() + JSON.stringify()
+							contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+							success: function (data, status, xhr) {
+								alert('정상 입력되었습니다');
+								console.log('data: ' + data);
+							},
+							error: function (request, status, error) {
+								alert('입력 중 에러');
+								console.log('request.status: ' + request.status + 'status: ' + status + 'error: ' + error);
+							}
+						});
+					}
+					, updateMember: function (form) {
+						//ajax로 db에 데이터 수정 요청
+						$.ajax({
+							url: '/page1/update',
+							type: 'post',
+							data: form,
+							contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+							success: function (data, status, xhr) {
+								alert('정상 수정되었습니다');
+								console.log('data: ' + data);
+							},
+							error: function (request, status, error) {
+								alert('수정 중 에러');
+								console.log('request.status: ' + request.status + 'status: ' + status + 'error: ' + error);
+							}
+
+						});
+					}
+					, deleteMember: function (key) {
+						//ajax로 db에 데이터 수정 요청
+						$.ajax({
+							url: '/page1/delete',
+							type: 'post',
+							data: {key: key},
+							//dataType: 'json',
+							contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+							success: function (data, status, xhr) {
+								alert('정상 삭제되었습니다');
+								console.log('data: ' + data);
+							},
+							error: function (request, status, error) {
+								alert('삭제 중 에러');
+								console.log('request.status: ' + request.status + 'status: ' + status + 'error: ' + error);
+							}
+
+						});
+					}
+					, validationAndSubmit: function (type) {
+						if ($('#' + type + 'RecordForm > input[class=userNm]').val() == '') {
+							alert('이름을 입력하세요');
+							return false;
+						}
+						else if ($('#' + type + 'RecordForm > input[class=userId]').val() == '') {
+							alert('아이디를 입력하세요');
+							return false;
+						}
+						else if ($('#' + type + 'RecordForm > input[class=pw]').val() == '') {
+							alert('비밀번호를 입력하세요');
+							return false;
+						}
+						else if ($('#' + type + 'RecordModal > input[class=regiUser]').val() == '') {
+							alert('등록자 아이디를 입력하세요');
+							return false;
+						}
+						else if ( type=="add" && $('#' + type + 'RecordForm > input[class=pw]').val() != $('#' + type + 'RecordForm > input[class=pw2]').val()) {
+							alert('비밀번호가 일치하지 않습니다');
+							return false;
+						}
+						
+						console.log(type);
+						console.log('#'+type+'RecordForm > input[class=userNm]');
+						console.log($('#' + type + 'RecordForm > input[class="userNm"]'));
+						console.log($('#addRecordForm > input[class="userNm"]'));
+
+						var form = $('#' + type + 'RecordForm').serialize();
+						var formJSON = JSON.stringify($('#' + type + 'RecordForm').serialize());
+						switch (type) {
+							case "add": 
+								GRID_CRUD_SUBMIT.addMember(form);
+								break;
+							case "update": 
+								GRID_CRUD_SUBMIT.updateMember(form); 
+								break;
+							}
+						GRID_MODAL.modalClose(type);
+						console.log('validation 및 '+type+'과정 진행완료');
+					}
+					, ifBlankReturnFalse: function (type, inputClass, message) {
+						if ($('#' + type + 'RecordForm > input[class=' + inputClass + ']').val() == '') {
+							alert(message + '을(를) 입력하세요');
+							return false;
+						}
+					}
+				}///GRID_CRUD_SUBMIT
+
+				var GRID_MODAL = {
+					modalClose: function(type){
+						console.log('이걸로 가져와지나?:'+$('#' + type + 'RecordModal'));
+						
+						//modal 닫기
+						$('#' + type + 'RecordModal').modal('hide');
+						//modal 닫히면 input 값들 비우기
+						//$('#' + type + 'RecordModal').on('hidden.bs.modal', function () {
+						$('#' + type + 'RecordModal').find('input').val('').end();
+						//데이터 새로고침
+						GRID.loadDataSource();							
+						
+					}
+					/*
+					, buttonModal: function(button,type){
+						switch(type){
+							case "add":
+								switch(button){
+									case "Submit":
+										GRID_CRUD_SUBMIT.validationAndSubmit('add');
+									case "Close":
+										GRID_MODAL.modalClose('add'); break;
+								}
+							case "update":
+								switch(button){
+									case "Submit":
+
+								}
+						}
+						
+						
+						$('#' + type + 'Btn')
+					}
+					*/
+				}
+
+
+
+				function init() {
+					$('.box-body').hide();
+				}
+
+
+		
+
+
+				//조회
+				$('#viewTable').on('click', function () {
+					$('.box-body').show();
+				});
+
+				//등록 폼 열기
+				$('#addRecord').on('click', function () {
+					//modal 열기
+					$('#addRecordModal').modal('show');
+				});
+				//저장 버튼
+				$('#addSubmitBtn').on('click', function () {
+					GRID_CRUD_SUBMIT.validationAndSubmit('add');
+				});
+				//닫기 버튼
+				$('#addCloseBtn').on('click', function () {
+					if(!confirm('등록을 취소하시겠습니까?')) return false;
+					else{
+						GRID_MODAL.modalClose('add');		
+					}
+				});
+
+				///////////////////////////////////////////////
+
+				//수정
+				$('#updateRecord').on('click', function () {
+					//하나만 선택했는지 확인하는 로직
+					if (selectedRows === undefined) {
+						alert('수정할 회원을 선택해주세요!');
+						return false;
+					} else if (selectedRows.selectedRowKeys.length > 1) {
+						alert('한 번에 한 명만 수정할 수 있습니다');
+						return false;
+					}
+					var data = selectedRows.selectedRowsData[0];
+					//input 태그 채워넣기
+					$('#updateRecordForm > input.form-control.userNm').val(data.userNm);
+					$('#updateRecordForm > input.form-control.userId').val(data.userId); //2개 선택
+					$('#updateRecordForm > input.form-control.pw').val(data.pw);
+					$('#updateRecordForm > input.form-control.regiUser').val(data.regiUser);
+
+					$('#updateRecordModal').modal('show');
+				});
+					
+				//저장 버튼
+				$('#updateSubmitBtn').on('click', function () {
+					GRID_CRUD_SUBMIT.validationAndSubmit('update');
+				});
+				//닫기 버튼
+				$('#updateCloseBtn').on('click', function () {
+					if(!confirm('수정을 취소하시겠습니까?')) return false;
+					else{
+						GRID_MODAL.modalClose('update');		
+					}
+				});
+				//데이터 새로고침
+				//GRID.loadDataSource();
+				
+				////////////////////////////////////////////////////////
+
+				//삭제
+				$('#deleteRecord').on('click', function () {
+					if (selectedRows === undefined) {
+						alert('삭제할 회원을 선택해주세요!');
+						return false;
+					}
+					//n개의 행 삭제하시겠습니까? confirm
+					else if (!confirm(selectedRows.selectedRowKeys.length + '명의 정보를 삭제하시겠습니까?')) return false;
+					else{
+						GRID_CRUD_SUBMIT.deleteMember(selectedRows.selectedRowKeys);
+						//데이터 새로고침
+						GRID.loadDataSource();
+					}
+				});
+
+
+				//초기화
+				init();
+				console.log()
+				
+				GRID.loadDataSource();
+
+
+
+			});
+		</script>
+	</th:block>
+</body>
+
+</html>

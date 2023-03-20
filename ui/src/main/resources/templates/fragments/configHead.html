@@ -1,0 +1,26 @@
+<head xmlns:th="http://www.thymeleaf.org" th:fragment="configHead">
+<!--fragments 폴더에 들어가 있는 configHead.html-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- jQuery -->
+	<script th:src="@{/asset/plugins/jquery/jquery.min.js}"></script>
+	<script th:src="@{/asset/plugins/jquery/jquery.cookie.js}"></script>
+	<script th:src="@{/asset/plugins/jquery/jquery.validate.min.js}"></script>
+	<script th:src="@{/asset/plugins/jquery/jquery.mask.min.js}"></script>
+	<script th:src="@{/asset/plugins/jquery/jquery.form.js}"></script>
+	<script th:src="@{/asset/plugins/jquery/chosen.jquery.min.js}"></script>
+	<link th:href="@{/asset/plugins/jquery/css/chosen.min.css}" rel="stylesheet" />
+    
+    <!-- Bootstrap -->
+    <link th:href="@{/asset/plugins/bootstrap/css/bootstrap.min.css}" rel="stylesheet" />
+	<script th:src="@{/asset/plugins/bootstrap/js/bootstrap.min.js}"></script>
+
+    <!-- DevExtreme library -->
+	<link rel="stylesheet" type="text/css" th:href="@{/asset/plugins/devExtreme/css/dx.common.css}" />
+	<link rel="stylesheet" type="text/css" th:href="@{/asset/plugins/devExtreme/css/dx.light.css}" />
+   	<script src="plugins/devExtreme/dx.all.js" th:src="@{/asset/plugins/devExtreme/js/dx.all.js}"></script>
+	<script src="plugins/devExtreme/globalize.js" th:src="@{/asset/plugins/devExtreme/js/globalize.js}"></script>
+	<script src="plugins/devExtreme/dx.aspnet.data.js" th:src="@{/asset/plugins/devExtreme/js/dx.aspnet.data.js}"></script>
+<!--configHead.html 끝-->
+</head>

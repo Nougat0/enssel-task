@@ -1,0 +1,1262 @@
+<script>
+var QmsUi = {
+    modal: null,
+    allExcel: "",
+    allTr: null,
+    init: function () {
+
+        // ie11에서 이전페이지로 이동 금지 처리
+        //readonly가 있을 때 백스페이스 누르면 뒤로가기됨.
+        $(document).keydown(function (e) {
+            if (e.keyCode == 8 && e.target.tagName != 'INPUT' && e.target.tagName != 'TEXTAREA') {
+                if (!($(e.target).hasClass('note-editable') || $(e.target).hasClass('trumbowyg-editor'))) { //텍스트에디터 예외
+                    e.preventDefault();
+                }
+            }
+        });
+
+        //searchForm Setting
+        //고려해봅시다. 새로고침해도 조회조건 남기기 + 자동완성끄기
+        var $searchForm = $('#searchForm');
+        if ($searchForm.length > 0) {
+            //자동완성 기능 끄기
+            $searchForm.attr('autocomplete', 'off');
+
+            //searchForm -> Input Enter Key 처리
+            $searchForm.find('input').keypress(function (e) {
+                // Enter pressed?
+                if (e.which == 10 || e.which == 13) {
+                    e.preventDefault();
+
+                    $('#seleBtn').trigger('click')
+
+                }
+            });
+        }
+
+        //확인 필요.
+        //$(".modal").css("overflow","scroll");
+
+        //QmsUi.allTr = QmsUi.trAdd('.dataTable tr').replace("<th></th>","");
+
+
+        //Header에 비밀번호 변경Form .
+        $("#btnUserPassword").click(function () {
+
+            var $passwordInput = $("#headerUserPasswordForm").find("input[name='headerPassword']");
+            var pw = $passwordInput.val();
+
+            if (V_Util.IsEmpty(pw)) {
+                alert('비밀번호를 입력해주세요.')
+                $passwordInput.val("");
+                return;
+            }
+
+            if (!V_Util.PasswordValidate(pw)) {
+                alert('비밀번호는 8~16자리, 영문(소문자)+숫자 조합이여야 합니다.')
+                $passwordInput.val("");
+                return;
+            }
+
+            var obj = {};
+            obj.compCd = G_USER.compCd;
+            obj.coopCd = G_USER.coopCd;
+            obj.coopPw = V_Util.SHA256(pw);
+            var userId = G_USER.userId;
+
+            if (V_Util.IsEmpty(obj.coopCd)) {
+                alert('협력사만 수정 할 수 있습니다.')
+                $passwordInput.val("");
+                return;
+            }
+
+            // null 값 발생 - 원인 파악 필요
+            // 수정완료
+            if (obj.coopPw == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855") {
+                alert('해당 비밀번호는 사용할 수 없습니다. 다른 비밀번호를 입력해주세요.')
+                return;
+            }
+
+            $.ajax({
+                type: "PUT",
+                url: G_CONTEXT_PATH + "/basei/userMana/users/" + userId + "/password",
+                data: JSON.stringify(obj),
+                contentType: "application/json; charset=UTF-8",
+                /*success: function (data) {
+		            	$passwordInput.val("");
+		            	DevExpress.ui.notify({ message: "변경되었습니다.", width: 300, shading: true }, "success", 500);
+		            },*/
+                success: function (result) {
+
+                    var data = result.body
+                    var successFlag = data.successFlag;
+                    if (successFlag) {
+                        alert(data.msg);
+                        location.href = G_CONTEXT_PATH + "/logout";
+                    } else {
+                        alert(data.msg)
+                    }
+                },
+                error: function (e) {
+                    alert("비밀번호 변경 중 오류가 발생하였습니다. 다시 시도 해주세요.")
+                },
+
+            }).done(function () {
+                $passwordInput.val("");
+            });
+        });
+
+        /*	QmsUi.createGridCommonEvent();*/
+        //localStorage에 Form Data 적재된 Data를 Form에 넣어주기
+
+        //조회조건 안남길거면 필요없음.
+        /*var $form = $("#searchForm");
+			var unindexed_array = $form.serializeArray();
+			$.map(unindexed_array, function(n, i){
+				var item = localStorage.getItem("qmsGetFormData_"+n['name']);
+				if(item == null || item == undefined){
+				}else{
+					$("#searchForm").find("[name=\""+n['name']+"\"]").val(item);
+				}
+			});
+
+			//페이지 이동 a tag 누를시 localStorage Form Data 초기화
+			$(document).on('click', ".logo", function(e) {
+				// Don't follow the link
+				e.preventDefault();
+
+				// Remember the link href
+			    var href = this.href;
+
+			    // Do the async thing
+		        // This is the completion callback for the asynchronous thing;
+			    var removeKeyArr = new Array();
+		    	for (let i = 0; i < localStorage.length; i++) {
+		    		var key = localStorage.key(i);
+		    		if(key.indexOf('qmsGetFormData') > -1){
+		    			removeKeyArr.push(key);
+		    		}
+		    	}
+
+		    	for (let i = 0; i < removeKeyArr.length; i++) {
+		    	    localStorage.removeItem(removeKeyArr[i]);
+		    	}
+
+		        // go to the link
+		        window.location = href;
+			});
+
+			//페이지 이동 a tag 누를시 localStorage Form Data 초기화
+			$(document).on('click', ".treeview-menu a", function(e) {
+				// Remember the link href
+				var href = this.href;
+				if(href == '' || href == '#' || href == null || href == undefined){
+					return false
+				}
+
+				// Don't follow the link
+				e.preventDefault();
+
+
+			    // Do the async thing
+		        // This is the completion callback for the asynchronous thing;
+			    var removeKeyArr = new Array();
+		    	for (let i = 0; i < localStorage.length; i++) {
+		    		var key = localStorage.key(i);
+		    		if(key.indexOf('qmsGetFormData') > -1){
+		    			removeKeyArr.push(key);
+		    		}
+		    	}
+
+		    	for (let i = 0; i < removeKeyArr.length; i++) {
+		    	    localStorage.removeItem(removeKeyArr[i]);
+		    	}
+
+		        // go to the link
+		        window.location = href;
+			});
+
+			//상단버튼 누를시 localStorage Form Data 적재
+			$(document).on('click', ".qmsGetFormData", function(e) {
+				var $form = $("#searchForm");
+				var unindexed_array = $form.serializeArray();
+				//초기화버튼을 누르면 localStorage 저장도 초기화
+				if(e.target.id == 'initBtn'){
+				    // Do the async thing
+			        // This is the completion callback for the asynchronous thing;
+				    var removeKeyArr = new Array();
+			    	for (let i = 0; i < localStorage.length; i++) {
+			    		var key = localStorage.key(i);
+			    		if(key.indexOf('qmsGetFormData') > -1){
+			    			removeKeyArr.push(key);
+			    		}
+			    	}
+
+			    	for (let i = 0; i < removeKeyArr.length; i++) {
+			    	    localStorage.removeItem(removeKeyArr[i]);
+			    	}
+
+				}else{
+					$.map(unindexed_array, function(n, i){
+						localStorage.setItem("qmsGetFormData_"+n['name'], n['value']);
+					});
+				}
+
+			});*/
+
+
+    },
+
+
+    /**
+     * DataTable Double Click Event 공통
+     *
+     * 필수조건
+     * DataTable Class        : dataTable
+     * Row의 Checkbox name    : chkList
+     * 추가일때 버튼 누름        : addBtn
+     * 수정일때 버튼 누름        : updaBtn
+     *
+     * nodeUpSertFlag
+     *        Y : Update
+     *        N : Insert
+     * */
+    /*createGridCommonEvent : function(){
+
+			return false;
+			$(document).on('dblclick', ".dataTable tbody tr", function(e) {
+
+
+				var data = $(".dataTable").DataTable().row( this ).data();
+				if(data['nodeUpSertFlag'] == undefined || data['nodeUpSertFlag'] == null){
+					return false;
+				}
+				$(".dataTable input:checkbox[name=chkList]").prop('checked', false);
+				$(this).find("input:checkbox[name=chkList]").prop('checked', true);
+				if(data['nodeUpSertFlag'] == 'Y'){
+					if($("#updaBtn").length < 1){
+						QmsUi.alert({msg:"수정할 권한이 없습니다."});
+						return false;
+					}
+					$("#updaBtn").trigger('click');
+				}else{
+					if($("#addBtn").length < 1){
+						QmsUi.alert({msg:"추가할 권한이 없습니다."});
+						return false;
+					}
+					$("#addBtn").trigger('click');
+				}
+
+			});
+
+		},*/
+
+
+    /**
+     * downloadExcel : 엑셀 다운로드 공통(xlsx)
+     * param
+     * title(String)        : 파일이름, sheet제목
+     * header(String[])        : 그리드 헤더            ex) [사용자ID, 사용자명, 소속회사코드 ...]
+     * content(String[])    : 그리드 헤더 맵핑 key    ex) [userId, userNm, compCd ...]
+     * list(Object[])        : 실데이터                ex) [{userId:"admin",userNm:"관리자"...}, {userId:"manager",userNm:"매니저"...},...]
+     * */
+
+    //최신버전 19-05-20
+    //자바단에도 3버전
+    //엑셀 다운로드시 비동기가 안됨. poi를 사용해서 하게될경운데 이거 쓸수밖에 없음.
+    downloadExcel: function (param) {
+        var sort0 = $('.sorting_asc,.sorting_desc').eq(0)
+        var sorting = sort0.data('role')
+        var sortDir = "desc";
+        if (sort0.hasClass('sorting_asc')) {
+            sortDir = "asc";
+        }
+        if (sorting != null) {
+            param.param['order[0][column]'] = 0;
+            param.param['columns[0][data]'] = sorting;
+            param.param['order[0][dir]'] = sortDir;
+        }
+        var form = document.createElement('form');
+        form.name = 'commonExcelDownLoadForm';
+        form.method = 'POST';
+        //자바단에 여기 확인
+        form.action = G_CONTEXT_PATH + "/common/excel/export3";
+
+        var iptTitle = document.createElement('INPUT');
+        iptTitle.type = 'TEXT';
+        iptTitle.name = 'title';
+        iptTitle.value = param.title;
+        form.appendChild(iptTitle);
+
+        var iptHeader = document.createElement('INPUT');
+        iptHeader.type = 'TEXT';
+        iptHeader.name = 'header';
+        iptHeader.value = JSON.stringify(param.header);
+        form.appendChild(iptHeader);
+
+        var iptContent = document.createElement('INPUT');
+        iptContent.type = 'TEXT';
+        iptContent.name = 'content';
+        iptContent.value = JSON.stringify(param.content);
+        form.appendChild(iptContent);
+
+        var iptList = document.createElement('INPUT');
+        iptList.type = 'TEXT';
+        iptList.name = 'list';
+        iptList.value = JSON.stringify(param.list);
+        form.appendChild(iptList);
+
+        var iptUrl = document.createElement('INPUT');
+        iptUrl.type = 'TEXT';
+        iptUrl.name = 'url';
+        iptUrl.value = param.url;
+        form.appendChild(iptUrl);
+
+        var iptParam = document.createElement('INPUT');
+        iptParam.type = 'TEXT';
+        iptParam.name = 'param';
+        iptParam.value = JSON.stringify(param.param);
+        form.appendChild(iptParam);
+
+        document.body.appendChild(form);
+        form.submit();
+
+        $("form[name='commonExcelDownLoadForm']").remove();
+    },
+    /**
+     * Dev DataSource 를 이용한 Export V1
+     *
+     * inspm > inspmInspectionManaState.html 참조
+     *
+     * 사용제한
+     * 1. dataStore 를 new DevExpress.data.AspNet.createStore 사용한경우 이용한다.
+     * 2. ajaxSettings 가 있어야한다.
+     * 3. API에서 데이터를 불러올것 인데 API는 POST 이여야한다. Paging도 없어야한다.
+     * 4. G_CONTEXT_PATH가 빠진 URL이여야한다.
+     * By Dollee
+     * 2020-05-06
+     * */
+    downloadExcelV1: function (param) {
+        var form = document.createElement('form');
+        form.name = 'commonExcelDownLoadForm';
+        form.method = 'POST';
+        //자바단에 여기 확인
+        form.action = G_CONTEXT_PATH + "/common/excel/export/V1";
+
+        var iptParam = document.createElement('INPUT');
+        iptParam.type = 'TEXT';
+        iptParam.name = 'param';
+        iptParam.value = param.param;
+        form.appendChild(iptParam);
+
+        var iptInfo = document.createElement('INPUT');
+        iptInfo.type = 'TEXT';
+        iptInfo.name = 'info';
+        iptInfo.value = param.info;
+        form.appendChild(iptInfo);
+        document.body.appendChild(form);
+        form.submit();
+        $("form[name='commonExcelDownLoadForm']").remove();
+    },
+    /**
+     * 공통 파일다운로드
+     * 1. param
+     *        attaSequ    : 첨부파일 SEQ
+     *        attaNo        :첨부순서
+     *
+     * by 김영수 2019.06.10
+     *
+     * 수정 Param
+     * param {
+     * attaSequ : ATTA_SEQU (첨부파일 시퀀스) //필수
+     * attaNo	: ATTA_NO	(첨부파일 시퀀스내의 순번)//필수
+     * extraKey	: 추가 변수	(없으면 안넣어도됨)
+     * extraVal	: 추가 변수값	(없으면 안너어도됨)
+     * }
+     *
+     * ex)
+     *
+     * QmsUi.downloadFile({attaSequ:1322,attaNo:2})    //일반적인 경우
+     *
+     * QmsUi.downloadFile({attaSequ:1322,attaNo:2,extraKey:'view',extraVal:'Y'})    //추가 파라미터가 필요할 시
+     *
+     * 실사용예)
+     *
+     * 1.정적으로 만들때
+     * <a onclick="QmsUi.downloadFile({attaSequ:1433,attaNo:1}); return false;" href="#">기타파일01.txt</a>
+     *
+     * 2.동적으로 만들때
+     * attachListStr += "<a href='#' onclick='QmsUi.downloadFile({attaSequ:"+obj.attaSequ+",attaNo:"+obj.attaNo+"}); return false;'>";
+     * $("#tdAttachList").append(attachListStr);
+     *
+     * by 황도리 2019.06.11
+     * */
+    downloadFile: function (param) {
+
+        var url = G_CONTEXT_PATH + "/core/fileDownload/" + param.attaSequ + "/" + param.attaNo;
+
+        if (param.extraKey == undefined || param.extraKey == null) {
+        } else {
+            url += "?" + param.extraKey + "=" + param.extraVal;
+            url = encodeURI(url);
+        }
+
+        $("#attachForm").remove();
+        var $form = $('<form id="attachForm"></form>');
+
+        $form.attr('action', url);
+        $form.attr('method', 'get');
+        //$form.attr('target', '_blank');
+        $form.appendTo('body');
+        $form.submit();
+    },
+    removeFile: function (param) {
+        var resultRemove = DevExpress.ui.dialog.confirm("<i>해당 첨부파일을 삭제 하시겠습니까?</i><br>", "파일 삭제");
+        resultRemove.done(function (dialogResult) {
+            if (dialogResult) {
+                $.ajax({
+                    type: 'GET',
+                    url: G_CONTEXT_PATH + "/core/fileDelete/" + param.attaSequ + "/" + param.attaNo,
+                    success: function (response) {
+                        if (param.loc != null) {
+                            $('.atta' + param.attaSequ + 'no' + param.attaNo).remove();
+                            alert('삭제되었습니다.');
+                        } else {
+                            alert('삭제되었습니다.');
+                            location.reload();
+                        }
+
+                    },
+                    error: function (req) {
+                        alert("응답오류 = " + req.status);
+                    }
+                });
+            }
+        });
+
+    },
+    /**
+     * 공통 alert창
+     * 1. param
+     *        title    : alert창의 제목        default : 주의 (CM QMS)
+     *        msg        : alert창의 메세지 이름    default : alert msg
+     *        width,height 미구현
+     * 2. 주의
+     *        element id가 qmsZone, qmsZoneModal 사용됨
+     * by 황도리 2019.02.27
+     * */
+    alert: function (param) {
+        /*var isVisible = $('#qmsZoneModal').is(':visible');
+			if(isVisible){
+				return;
+			}*/
+        var title = '주의 (JS QMS)';
+        var msg = 'alert msg';
+        var width = '30%';
+        var heigth = '150px';
+        if (param.title != undefined) title = param.title;
+        if (param.msg != undefined) msg = param.msg;
+        if (param.width != undefined) width = param.width;
+        if (param.heigth != undefined) msg = param.heigth;
+        //content container-fluid
+        var modalElem = new Array();
+        modalElem[modalElem.length] = '<div id="qmsZoneModal" class="modal modal-default" style="display:none;">';
+        modalElem[modalElem.length] = '	<div class="modal-dialog">';
+        modalElem[modalElem.length] = '		<div class="modal-content">';
+        modalElem[modalElem.length] = '			<div class="modal-body">';
+        modalElem[modalElem.length] = '				<div class="box box-primary">';
+        modalElem[modalElem.length] = '					<div class="box-header with-border"><h4 class="box-title">' + title + '</h4></div>';
+        modalElem[modalElem.length] = '					<div class="box-body"><p>' + msg + '</p></div>';
+        modalElem[modalElem.length] = '					<div class="box-footer"><button class="btn btn-default pull-right qmsZoneModalButtonClose">닫기</button></div>';
+        modalElem[modalElem.length] = '				</div>';
+        modalElem[modalElem.length] = '			</div>';
+        //modalElem[modalElem.length] = '			<div class="modal-footer"><button class="btn btn-default" data-dismiss="modal">닫기</button></div>';
+        modalElem[modalElem.length] = '		</div>';
+        modalElem[modalElem.length] = '	</div>';
+        modalElem[modalElem.length] = '</div>';
+
+        var elemStr = modalElem.join('');
+        $("#qmsZone").empty();
+        $("#qmsZone").append(elemStr);
+        //모달을 스태틱으로 띄우는 방법 알아야함 현재는 모달창이 나오고 아무데나 클릭하면 사라짐.
+        $('#qmsZoneModal').modal('show');
+
+        $("#qmsZoneModal .qmsZoneModalButtonClose").click(function (event) {
+            $('#qmsZoneModal').modal('hide');
+
+
+        });
+    },
+    /**
+     * 공통 confirm창
+     * 1. param
+     *        title    : alert창의 제목        default : 주의 (CM QMS)
+     *        msg        : alert창의 메세지 이름    default : alert msg
+     *        sucess    : 확인누를시 Callback 함수 (필수)
+     *        deny    : 취소누를시 Callback 함수 (default : none)
+     *        width,height 미구현
+     * 2. 주의
+     *        element id가 qmsZone, qmsZoneModal 사용됨
+     *        class qmsZoneModalConfirmButton 사용됨
+     * by 황도리 2019.02.27
+     * */
+    confirm: function (param) {
+        var isVisible = $('#qmsZoneModal').is(':visible');
+        if (isVisible) {
+            return;
+        }
+        var title = '알림 (JS QMS)';
+        var msg = 'confirm msg';
+        var width = '30%';
+        var heigth = '150px';
+        if (param.title != undefined) title = param.title;
+        if (param.msg != undefined) msg = param.msg;
+        if (param.width != undefined) width = param.width;
+        if (param.heigth != undefined) msg = param.heigth;
+        //content container-fluid
+        var modalElem = new Array();
+
+        modalElem[modalElem.length] = '<div id="qmsZoneModal" class="modal modal-default" style="display:none;">';
+        modalElem[modalElem.length] = '	<div class="modal-dialog">';
+        modalElem[modalElem.length] = '		<div class="modal-content">';
+        modalElem[modalElem.length] = '			<div class="modal-body">';
+        modalElem[modalElem.length] = '				<div class="box box-primary">';
+        modalElem[modalElem.length] = '					<div class="box-header with-border"><h4 class="box-title">' + title + '</h4></div>';
+        modalElem[modalElem.length] = '					<div class="box-body"><p>' + msg + '</p></div>';
+        modalElem[modalElem.length] = '					<div class="box-footer"><button class="btn btn-default pull-right qmsZoneModalConfirmButtonNo" style="margin-left:5px;" data-dismiss="modal">취소</button><button class="btn btn-primary pull-right qmsZoneModalConfirmButton" style="margin-left:5px;">확인</button></div>';
+        modalElem[modalElem.length] = '				</div>';
+        modalElem[modalElem.length] = '			</div>';
+        modalElem[modalElem.length] = '		</div>';
+        modalElem[modalElem.length] = '	</div>';
+        modalElem[modalElem.length] = '</div>';
+        var elemStr = modalElem.join('');
+        $("#qmsZone").empty();
+        $("#qmsZone").append(elemStr);
+        $("#qmsZoneModal .qmsZoneModalConfirmButton").click(function () {
+            $('#qmsZoneModal').modal('hide');
+            if (param.sucess != null) param.sucess();
+        });
+
+        if (param.deny == null || param.deny == undefined) {
+        } else {
+            $("#qmsZoneModal .qmsZoneModalConfirmButtonNo").click(function (event) {
+                event.preventDefault();
+                $('#qmsZoneModal').modal('hide');
+                param.deny();
+            });
+        }
+
+        $('#qmsZoneModal').modal('show');
+    },
+
+    //파일다운로드시 로딩화면 필요할떄?
+    loading: function () {
+        var isVisible = $('#qmsZoneModal').is(':visible');
+        if (isVisible) {
+            return;
+        }
+        var modalElem = new Array();
+        modalElem[modalElem.length] = '<div id="qmsZoneModal" class="modal modal-default" style="display:none;">';
+        modalElem[modalElem.length] = '	<div class="modal-dialog">';
+        modalElem[modalElem.length] = '		<div class="modal-content">';
+        modalElem[modalElem.length] = '			<div class="modal-body">';
+        modalElem[modalElem.length] = '				<div class="box box-danger">';
+        modalElem[modalElem.length] = '					<div class="box-header">';
+        modalElem[modalElem.length] = '						<h3 class="box-title">Loading</h3>';
+        modalElem[modalElem.length] = '					</div>';
+        modalElem[modalElem.length] = '					<div class="box-body">';
+        modalElem[modalElem.length] = '						잠시만기다려주세요';
+        modalElem[modalElem.length] = '					</div>';
+        modalElem[modalElem.length] = '					<div class="overlay">';
+        modalElem[modalElem.length] = '						<i class="fa fa-refresh fa-spin"></i>';
+        modalElem[modalElem.length] = '					</div>';
+        modalElem[modalElem.length] = '				</div>';
+        modalElem[modalElem.length] = '			</div>';
+        modalElem[modalElem.length] = '		</div>';
+        modalElem[modalElem.length] = '	</div>';
+        modalElem[modalElem.length] = '</div>';
+        var elemStr = modalElem.join('');
+        $("#qmsZone").empty();
+        $("#qmsZone").append(elemStr);
+        $('#qmsZoneModal').modal('show');
+    },
+
+    /**
+     * PopUp공통
+     * 1. param
+     *        url : url
+     *        w    : width
+     *        h    : height
+     *        elemId : 추가로 팝업으로 보낼 Parameter -> UserByDeptPop 에서 사용하고 있음 (필수는 아님)
+     *
+     * */
+    popup: function (url, w, h, elemId) {
+
+        // Fixes dual-screen position                         Most browsers      Firefox
+        var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : window.screenX;
+        var dualScreenTop = window.screenTop != undefined ? window.screenTop : window.screenY;
+
+        var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+        var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+        var systemZoom = width / window.screen.availWidth;
+        var left = (width - w) / 2 / systemZoom + dualScreenLeft
+        var top = (height - h) / 2 / systemZoom + dualScreenTop
+        var newWindow = null;
+        // Puts focus on the newWindow
+        var tid = null;
+        if (elemId == null || elemId == undefined) {
+
+            //등록팝업, 수정팝업은 한개만 띄우도록
+            if (url.toLowerCase().indexOf("regipop") !== -1 || url.toLowerCase().indexOf("updapop") !== -1) {
+                newWindow = window.open(url, "QMS_POP_WINDOW", 'scrollbars=yes, width=' + w / systemZoom + ', height=' + h / systemZoom + ', top=' + top + ', left=' + left + ', resizable=yes');
+            } else {
+                newWindow = window.open(url, "_blank", 'scrollbars=yes, width=' + w / systemZoom + ', height=' + h / systemZoom + ', top=' + top + ', left=' + left + ', resizable=yes');
+            }
+            //newWindow = window.open(url, "QMS_POP_WINDOW", 'scrollbars=yes,'+ ' top=' + top + ', left=' + left + ', resizable=yes');
+        } else {
+            newWindow = window.open(url + "?target=" + elemId, "QMS_POP_WINDOW", 'scrollbars=yes, width=' + w / systemZoom + ', height=' + h / systemZoom + ', top=' + top + ', left=' + left + ', resizable=yes');
+        }
+        if (window.focus) newWindow.focus();
+
+        return newWindow;
+    },
+
+    /**
+     * 현재 Url을 만드는 function
+     * dataTables -> ajax에서 사용됨
+     * ex)    qms/bi/user/table?dataNum=19&colForSearch=1&valForSearch=&userId=&regiUser=&deptCd=&userNm=&regiDt=&deptNm=&compCd=&updaUser=&userNo=&compNm=&updaDt=&teleNo=&starDt=&rema=&enddDt=
+     *        위의 string이 반환됨
+     * 1. 검색 Form이 serialize 되어 포함됨
+     * 2. 조회 Form의 ID는 searchForm 이여야한다
+     * 작성 :: 황도리 2019.02.27
+     * 수정 :: PBJ 2019.03.19
+     * */
+    serverSideUrl: function () {
+        var url = window.location.href;
+        var url_table_temp = url.split('?')[0] + "/table";
+        var url_table = url_table_temp + "?dataNum=" + $(".dataTable").eq(0).find('th').length;
+
+        if ($('#searchForm').length > 0) url_table += "&" + $('#searchForm').serialize();
+
+        return encodeURI(url_table);
+    },
+
+    serverSideUrl2: function (param) {
+        var url = window.location.href;
+        var url_table_temp = url.split('?')[0] + "/table/" + param;
+        var url_table = url_table_temp + "?dataNum=" + $(".dataTable").eq(0).find('th').length;
+
+        if ($('#searchForm').length > 0) url_table += "&" + $('#searchForm').serialize();
+
+        return encodeURI(url_table);
+    },
+
+    /**
+     * 현재 Url을 만드는 function
+     * dataTables -> ajax에서 사용됨
+     * ex) 사용예
+     * ajax : {
+     *				url : v.url,
+     *				data: v.postData,
+     *				type: 'POST',
+     *			},
+     *
+     * Retun param
+     * url : url
+     * data : 위 GET방식에 파라미터를 JSON으로 담은 Object
+     *
+     *
+     *    위의 를 포함한 JSON Object가 반환됨
+     *
+     * 1. 조회 Form의 ID는 searchForm 이여야한다
+     * 작성 :: 황도리 2019.05.10
+     * */
+    serverSideUrlPost: function () {
+        var url = window.location.href;
+        var url_table_temp = url.split('?')[0] + "/table";
+        var postData = new Object();
+        var indexed_array = {};
+        if ($('#searchForm').length > 0) {
+            var unindexed_array = $('#searchForm').serializeArray();
+
+            $.map(unindexed_array, function (n, i) {
+                indexed_array[n['name']] = n['value'];
+            });
+        }
+        postData = indexed_array;
+        postData['dataNum'] = $(".dataTable").eq(0).find('th').length;
+        return {
+            url: url_table_temp,
+            postData: postData
+        };
+    },
+
+    /*
+		 * 작성 :: 박범진 2020.03.12
+		 * 용도 :: 엑셀 내보내기
+		 */
+    serverSideUrlPostExcel: function () {
+        var url = window.location.href;
+        url = url.split('?')[0] + "/Excel";
+
+        var strs = url.split("/");
+        url = "/" + strs[strs.length - 3] + "/" + strs[strs.length - 2] + "/" + strs[strs.length - 1];
+
+        var postData = new Object();
+        var indexed_array = {};
+        if ($('#searchForm').length > 0) {
+            var unindexed_array = $('#searchForm').serializeArray();
+
+            $.map(unindexed_array, function (n, i) {
+                indexed_array[n['name']] = n['value'];
+            });
+        }
+        postData = indexed_array;
+        postData['dataNum'] = $(".dataTable").eq(0).find('th').length;
+        return {
+            url: url,
+            postData: postData
+        };
+    },
+
+    /*
+		 * 작성 :: 박범진 2020.03.12
+		 * 용도 :: Get Header Row Length For Excel
+		 */
+    getHeaderRowLength: function (header) {
+        var array = new Array();
+
+        $.each(header, function (idx, val) {
+            var str = val.merge.replace("(", "").replace(")", "");
+            var strArray = str.split(',');
+            array.push(parseInt(strArray[0]));
+        });
+
+        var max = Math.max.apply(null, array);
+
+        return max + 1;
+    },
+
+    /**
+     * 현재 페이지를 재로딩
+     * QDMS에서 가져옴 일단 넣어둠
+     * by 황도리 2019.02.27
+     *
+     *
+     * param  # + table element id ex) #idTable
+     * searchForm reset
+     * by 2019-03-22 수정
+     *
+     * resetPage2 : chosen처리
+     * by 2019-05-27 추가
+     * */
+    resetPage: function (tableId) {
+        document.getElementById("searchForm").reset();
+        $('#searchForm input').prop('required', false);
+        $('#searchForm input').prop('required', true);
+        $('#searchForm select').prop('selectedIndex', 0);
+        if (tableId == undefined || tableId == null) {
+        } else {
+            if (!$.fn.DataTable.isDataTable(tableId)) {
+                return false;
+            } else {
+                QmsUi.reloadTable(tableId);
+            }
+
+        }
+        //window.location = window.location.href.split("?")[0]; //AS-IS
+    },
+    resetPage2: function (tableId) {
+        $('#searchForm .chosen-select').each(function () {
+            $(this).val("");
+            $(this).trigger("chosen:updated");
+        })
+        document.getElementById("searchForm").reset();
+        $("#seleBtn").click();
+
+    },
+
+    /**
+     * 현재 dataTabl재로딩
+     * QDMS에서 가져옴 일단 넣어둠
+     * param  # + table element id ex) #idTable
+     * by 황도리 2019.02.27
+     * */
+    reloadTable: function (tableId) {
+        $(tableId).DataTable().ajax.url(QmsUi.serverSideUrl()).load();
+    },
+
+    /**
+     *
+     * */
+
+    getAllRows: function (grdObject) {
+        if (grdObject == null || grdObject == undefined) {
+            QmsUi.alert({msg: "Need GrdObject"});
+            return false;
+        }
+        var returnArr = new Array();
+        jQuery.each(grdObject.rows().data(), function (i, val) {
+            returnArr.push(val);
+        });
+        return returnArr;
+    },
+
+
+    /**
+     * dataTables에 checkbox에 체크한 Row return
+     * param table Object
+     * by 황도리 2019.02.27
+     * */
+    getCheckedRows: function (grdObject) {
+        if (grdObject == null || grdObject == undefined) {
+            QmsUi.alert({msg: "Need GrdObject"});
+            return false;
+        }
+        var r = new Array();
+        if ($(":checkbox[name='chkList']:checked").length > 0) {
+            $(":checkbox[name='chkList']:checked").each(function () {
+                if (grdObject.row($(this).parents('tr')).data() == null || grdObject.row($(this).parents('tr')).data() == undefined) {
+                } else {
+                    r.push(grdObject.row($(this).parents('tr')).data())
+                }
+            });
+        }
+        return r;
+    },
+
+
+    /**
+     * html to pdf
+     * param pdf로 변환할 elementId, output filename
+     * 개발중...
+     * by 황도리 2019.02.28
+     * */
+    //ie 노답 png-> jpg로 바꿔야함.
+    exportPDFfromHTML: function (elementId, filename) {
+
+        //ver1
+        /*html2canvas(document.getElementById(elementId)).then(canvas =>{
+				var imgData = canvas.toDataURL('image/png');
+				var doc = new jsPDF('p', 'mm', [ 297, 210 ]);
+				doc.addImage(imgData, 'PNG', 10, 10, 190, 95);
+				doc.save(filename+'.pdf');
+			});*/
+
+        //ver2
+        /*var pdf = new jsPDF('p', 'pt', 'letter');
+			pdf.html(document.getElementById(elementId), {callback: function(pdf) {
+		            var iframe = document.createElement('iframe');
+		            iframe.setAttribute('style','position:absolute;right:0; top:0; bottom:0; height:100%; width:500px');
+		            document.body.appendChild(iframe);
+		            iframe.src = pdf.output('datauristring');
+		        }});*/
+
+        //ver3
+        QmsUi.loading();
+
+        html2canvas(document.getElementById(elementId), {scale: 4}).then(function (canvas) {
+            var imgData = canvas.toDataURL('image/png');
+            /**/
+            var imgWidth = 210; // 이미지 가로 길이(mm) A4 기준
+            var pageHeight = imgWidth * 1.414;  // 출력 페이지 세로 길이 계산 A4 기준
+            var imgHeight = canvas.height * imgWidth / canvas.width;
+            var heightLeft = imgHeight;
+
+            var doc = new jsPDF('p', 'mm');
+            var position = 0;
+
+            // 첫 페이지 출력
+            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            // 한 페이지 이상일 경우 루프 돌면서 출력
+            while (heightLeft >= 20) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            // 파일 저장
+            doc.save(filename + '.pdf');
+            $('#qmsZoneModal').modal('hide');
+        });
+    },
+    downLoadPdf: function (param) {
+        var pdfUrl = G_CONTEXT_PATH + '/pdf/render';
+        $("#pdfForm").remove();
+        var $form = $('<form id="pdfForm"></form>');
+        var $iptParam = $('<input type="text" id="pdfOtion" name="pdfOtion">');
+        $iptParam.val(param);
+
+        $form.attr('action', pdfUrl);
+        $form.attr('method', 'post');
+        $form.attr('target', '_blank');
+        $form.append($iptParam);
+        $form.appendTo('body');
+        $form.submit();
+    },
+    /**
+     * Excel Export
+     * 주의
+     * - 화면에 그리드가 1개 이여야한다.
+     * - 그리드의 css class에 dataTable 가 있어야한다.
+     * - dataTable에 그리드 데이터를 QmsUi.serverSideUrl()로 불러와야한다.
+     * - 검색조건맞는 데이터 전체를 가져온다.
+     * - Excel ColumnHeader를 직접 String 으로 만들어야한다.
+     *
+     * Parameter
+     * JSON Object로 넘겨주어야한다.
+     * {
+     * 	target	: #을 포함한 그리드 엘리먼트 아이디 ( ex) #idTable),
+     * 	title	: 파일이름,
+     * 	header	: HTML로 이루어진 2줄의 ColumnHeader,
+     * 	content : 배열로 이루어진 그리드 데이터를 불러올 key값 ( ex) ["prjtNo","prjtNm","clntNm","modlNm","prdtGropNm","shipDt"]),
+     * 	addParam: 추가적인 Parameter가 필요할시 ( Rest Api Mapping이 GetMapping일때만 동작),
+     *  method	: 그리드를 불러오는 Rest Api에서 PostMapping  Or GetMapping 을 마춰주기위한 파라미터 ( default get, ex) "post")
+     * }
+     *
+     * var target = param.target;
+     * var title = param.title;
+     * var header = param.header;
+     * var content = param.content;
+     * var addParam = param.addParam;
+     * var method = param.method;
+     *
+     *
+     *
+     * ex) colspan, rowspan이 없을시
+     * str +="    <table border='2px'>";
+     * str +="        <tr bgcolor='#87AFC6'>";
+     * str +="            <th>프로젝트번호</th>";
+     * str +="            <th>프로젝트명</th>";
+     * str +="            <th>고객사</th>";
+     * str +="            <th>모델</th>";
+     * str +="            <th>제품군</th>";
+     * str +="            <th>출하일</th>";
+     * str +="        </tr>";
+     * str +="    </table>";
+     *
+     * ex> colspan, rowspan이 있을시
+     *  str +="        <table border='2px'>";
+     *  str +="            <tr bgcolor='#87AFC6'>";
+     *  str +="                <th colspan='2'>프로젝트</th>";
+     *  str +="                <th rowspan='2'>고객사</th>";
+     *  str +="                <th rowspan='2'>모델</th>";
+     *  str +="                <th rowspan='2'>제품군</th>";
+     *  str +="                <th rowspan='2'>출하일</th>";
+     *  str +="            </tr>";
+     *  str +="            <tr bgcolor='#87AFC6'>";
+     *  str +="                <th>프로젝트번호</th>";
+     *  str +="                <th>프로젝트명</th>";
+     *  str +="            </tr>";
+     *  str +="        </table>";
+     *
+     * - param 은 오브젝트로 넘겨주어야한다.
+     * ex)
+     * param = {
+     * 		target	: "#idTable",
+     * 		title	: "프로젝트_1",
+     * 		content	: ["prjtNo","prjtNm","clntNm","modlNm","prdtGropNm","shipDt"],
+     * 		header	: str,
+     * 		addParam	: "&aabb=Y&state=2019"
+     * 		method		: default (get), nullable
+     * }
+     *
+     *
+     * */
+    /*excelExport	: function(param){
+			var target = param.target;
+			var title = param.title;
+			var header = param.header;
+			var content = param.content;
+			var addParam = param.addParam;
+			var method = param.method;
+			if(target == undefined || target == null){
+				alert("그리드 엘리먼트의 ID가 필요합니다. (target)");
+				return;
+			}
+			if(title == undefined || title == null){
+				alert("엑셀파일명이 필요합니다. (title)");
+				return;
+			}
+			if(addParam == undefined || addParam == null){
+				addParam="";
+			}
+			var rowCount=$(target).closest(".box").find('.dataTables_info').text().split(": ")[1].replace(",","");
+			var sorting = $('.sorting_asc,.sorting_desc').eq(0).data('role')
+			var url = QmsUi.serverSideUrl()+"&order[0][column]=0&columns[0][data]="+sorting+"&order[0][dir]=desc&draw=-1&start=0&length="+rowCount;
+			if($('#searchForm').length > 0) url += "&" + $('#searchForm').serialize();
+			//post일 시 서치폼 json으로 만글기
+			var indexed_array = {};
+			if(method == undefined || method == null){
+			}else{
+				var unindexed_array = $('#searchForm').serializeArray();
+			    $.map(unindexed_array, function(n, i){
+			        indexed_array[encodeURI(n['name'])] = encodeURI(n['value']);
+			    });
+			    indexed_array['draw'] = -1;
+			    indexed_array['start'] = 0;
+			    indexed_array['length'] = rowCount;
+			}
+			url = encodeURI(url+addParam);
+
+			var form = document.createElement('form');
+			form.name='commonExcelDownLoadForm';
+			form.method='POST';
+			form.action=G_CONTEXT_PATH+"/common/excel/export2";
+
+			var iptUrl=document.createElement('INPUT');
+			iptUrl.type='TEXT';
+			iptUrl.name='url';
+			iptUrl.value=url;
+			form.appendChild(iptUrl);
+
+			var iptTitle=document.createElement('INPUT');
+			iptTitle.type='TEXT';
+			iptTitle.name='title';
+			iptTitle.value=title;
+			form.appendChild(iptTitle);
+
+			var iptContent=document.createElement('INPUT');
+			iptContent.type='TEXT';
+			iptContent.name='content';
+			iptContent.value=JSON.stringify(content);
+			form.appendChild(iptContent);
+
+			var iptHeader=document.createElement('INPUT');
+			iptHeader.type='TEXT';
+			iptHeader.name='header';
+			iptHeader.value=header;
+			form.appendChild(iptHeader);
+
+			var iptParam=document.createElement('INPUT');
+			iptParam.type='TEXT';
+			iptParam.name='postParam';
+			iptParam.value=JSON.stringify(indexed_array);
+			form.appendChild(iptParam);
+
+			if(param.method == null || param.method == undefined){
+			}else{
+				var iptMethod=document.createElement('INPUT');
+				iptMethod.type='TEXT';
+				iptMethod.name='method';
+				iptMethod.value=param.method;
+				form.appendChild(iptMethod);
+			}
+
+			document.body.appendChild(form);
+			form.submit();
+			$("form[name='commonExcelDownLoadForm']").remove();
+
+		},*/
+
+
+    //excel trAdd('#content .dataTable tr')
+    /*getThs : function (table){
+			var theads = new Array();
+			$(table).find('thead tr').eq(0).find('th').each(function(){
+				if($(this).data('role') != undefined){
+					theads.push($(this).data('role'))
+				}
+			})
+			return theads
+		},*/
+
+    //date 정규식체크
+    checkDateRegex: function (text) {
+        text = $.trim(text)
+        var reg = new Array();
+        var checkResult = false;
+        reg.push(/[0-9]{4}[/][0-9]{2}[/][0-9]{2}/)
+        reg.push(/[0-9]{4}[/-][0-9]{2}$/)
+        //reg.push(/[0-9]{2}[/-][0-9]{2}$/)
+        reg.push(/[0-9]{2}[/-][0-9]{2}[/-][0-9]{4}/)
+        reg.push(/[0-9]{2}[/-][0-9]{4}$/)
+        for (var r = 0; r < reg.length; r++) {
+            if (text.match(reg[r]) != null) {
+                checkResult = true;
+            }
+        }
+        return checkResult;
+    },
+    /**
+     * Excel 전체 Export
+     * */
+    /*jsonToTable : function (table,fileName){
+			var rowCount=$(table).closest(".box").find('.dataTables_info').text().split(": ")[1].replace(",","");
+			var sorting = $('.sorting_asc,.sorting_desc').eq(0).data('role')
+			if(sorting==""||sorting==null){
+				sorting=theads[0]
+			}
+			var theads=QmsUi.getThs(table)
+			QmsUi.allExcel = "";
+			var url = QmsUi.serverSideUrl()+"&order[0][column]=0&columns[0][data]="+sorting+"&order[0][dir]=desc&draw=-1&start=0&length="+rowCount;
+			if($('#searchForm').length > 0) url += "&" + $('#searchForm').serialize();
+			url = encodeURI(url);
+			var $allTr = $(QmsUi.allTr);
+			$allTr.find('th').each(function(){
+				var role = $(this).data('role');
+				var cnt = 0;
+	    		jQuery.each( theads, function( i, val ) {
+					if(val == role){
+						cnt++;
+					}
+				});
+	    		if(cnt == 0){
+	    			$(this).remove();
+	    		}
+	    	});
+			QmsUi.allTr = $allTr.html().replace("<tbody>","<table border='2px'>").replace("</tbody>","</table>");
+
+			$.ajax({
+				type	: "GET",
+				url		: url,
+				dataType:"json",
+				beforeSend:function(){$('#loading').show();},
+				complete	:function(){$('#loading').hide();QmsUi.excel('all',table,fileName);},
+				success	:function(json) {
+					var list = json["data"];
+					var il = list.length
+					var jl = theads.length
+
+					for(var i = 0; i<il; i++){
+
+						QmsUi.allExcel=QmsUi.allExcel+'<tr>'
+
+						for(var j = 0; j<jl; j++){
+
+							var cellValue=list[i][theads[j]]
+
+							if (cellValue == null) cellValue = "";
+							else if(theads[j]=="regiDt"||theads[j]=="updaDt"){
+								cellValue=cellValue.substr(0,10)
+							}else if(QmsUi.checkDateRegex(cellValue)){
+								//서식변환막기
+								cellValue="'"+cellValue
+							}
+
+							QmsUi.allExcel=QmsUi.allExcel+'<td>'+cellValue+'</td>'
+						}
+
+						QmsUi.allExcel=QmsUi.allExcel+'</tr>'
+					 }
+					 return QmsUi.allExcel;
+				},
+				error:function(req) {
+					alert("응답오류 = "+req.status);
+				    $('#loading').hide();
+				}
+			});
+		},*/
+
+    /**
+     * Excel 필요 Function
+     * */
+    /*trAdd : function (table){
+			var tab_text="<table border='2px'><tr bgcolor='#87AFC6'>";
+			$(table).each(function(){
+				tab_text=tab_text+$(this).html()+"</tr>";
+			});
+				 tab_text=tab_text+"</table>";
+				 tab_text= tab_text.replace(/<A[^>]*>|<\/A>/g, "");//remove if u want links in your table
+				 tab_text= tab_text.replace(/<img[^>]*>/gi,""); // remove if u want images in your table
+				 tab_text= tab_text.replace(/<input[^>]*>|<\/input>/gi, ""); // reomves input params
+				 tab_text= tab_text.replace(/<div[^>]*>|<\/div>/gi, ""); // reomves input params
+				 tab_text= tab_text.replace(/<span[^>]*>|<\/div>/gi, ""); // reomves input params
+				 //console.log(tab_text);
+			 return tab_text;
+		},*/
+
+    /**
+     * Excel 현제 페이지 Export
+     * */
+    /*excel : function (allYn,tableId,fileName){
+			var vTitleXXX = 'QMS';
+			var vEncodeHead = '<html><head><meta charset="UTF-8"></head><body>';
+			var vReportName = '';
+			vReportName += '<b style="color:#39639c"><font size="6">';
+			vReportName += vTitleXXX;
+			vReportName += '</b></font><br>';
+
+			var tab_text;
+			if(tableId == undefined){
+				QmsUi.alert({msg:"Need Grid Element 'TableId'"});
+				return false;
+			}
+		    if(allYn=='all'){
+		    	tab_text=QmsUi.allTr+QmsUi.trAdd(QmsUi.allExcel).replace("bgcolor='#87AFC6'","")
+		    	tab_text.replace("bgcolor='#87AFC6'","");
+		    	//return false;
+		    }else if(allYn=='N'){
+		    	//엑셀서식자동변환 막기
+		    	$(tableId+' tr td').each(function(){
+		    		 if(QmsUi.checkDateRegex($(this).text())){
+		        		$(this).text("'"+$(this).text())
+		        		$(this).addClass("changedTd")
+		    		}
+		    	})
+		    	tab_text=allTr+QmsUi.trAdd(tableId+' tbody tr').replace("bgcolor='#87AFC6'","");
+		    	//되돌리기
+		    	$('.changedTd').each(function(){
+		    			$(this).text($(this).text().substring(1))
+		    			$(this).removeClass("changedTd")
+		    	})
+		    }else{
+		    	//엑셀서식자동변환 막기
+		    	$(allYn+'tr td').each(function(){
+		    		 if(checkDateRegex($(this).text())){
+		        		$(this).text("'"+$(this).text())
+		        		$(this).addClass("changedTd")
+		    		}
+		    	})
+		    	tab_text=trAdd(allYn+' tr');
+		    	//되돌리기
+		    	$('.changedTd').each(function(){
+		    			$(this).text($(this).text().substring(1))
+		    			$(this).removeClass("changedTd")
+		    	})
+		    }
+
+		    if($("#category").length==0){
+		    	var nmFile = 'excel';
+		    }else{
+		    	var nmFile = $("#category").text().split(' > ');
+		    }
+			var data = new Blob([vEncodeHead +vReportName+tab_text+'</body></html>'],{
+				type:"application/vnd.ms-excel;charset=utf-8"
+			});
+			saveAs(data,fileName+".xls");
+
+			//log call
+			//logPost('0506','ExcelDown')
+			//popup('/excelPop',5,5 )
+		},
+		*/
+    /**
+     * Param : Date
+     * Javascipt Date를 포멧을 마춰 String으로 반환한다.
+     * ex) 20190404
+     * */
+    /*formatDate : function(date) {
+		    var d = new Date(date),
+		        month = '' + (d.getMonth() + 1),
+		        day = '' + d.getDate(),
+		        year = d.getFullYear();
+
+		    if (month.length < 2) month = '0' + month;
+		    if (day.length < 2) day = '0' + day;
+
+		    return [year, month, day].join('');
+		},*/
+
+    /*fileDownLoad : function(){
+
+		},
+		*/
+
+
+};
+</script>
