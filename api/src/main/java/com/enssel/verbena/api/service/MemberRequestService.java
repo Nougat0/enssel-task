@@ -1,8 +1,8 @@
 package com.enssel.verbena.api.service;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +10,10 @@ import org.springframework.stereotype.Service;
 import com.enssel.verbena.api.model.TestNougat0;
 import com.enssel.verbena.api.repository.MemberRepository;
 
+/**
+ * @author Enssel
+ *
+ */
 @Service
 public class MemberRequestService {
 	
@@ -21,20 +25,28 @@ public class MemberRequestService {
 //
 //	}
 	
+	
+	/**
+	 * 회원 읽어오기
+	 */
 	@Autowired
 	private MemberRepository memberRepository;
 
 	public List<TestNougat0> findAllMembers(){
-		//Map<String,Object> map = new HashMap<>();
-		//memberRepository.findAll().forEach(e->map.put("",e));
-		System.out.println("🔔🔔 MemberRequestService로 들어왔습니다 🔔🔔");
 //		List<TestNougat0> memberList = memberRepository.findAll();
-		List<TestNougat0> memberList = memberRepository.selectAllMemberWithY();
-		System.out.println("🔔🔔 findAllMembers() 함수 실행 🔔🔔");
+		
+		List<TestNougat0> memberList = memberRepository.findByUseYn("Y");
 		
 		return memberList;
 	}
 
+	
+	/**
+	 * 회원 한 명 등록
+	 * 
+	 * @param testNougat0
+	 * @return testNougat0
+	 */
 	public TestNougat0 addOneMember(TestNougat0 testNougat0){
 //		System.out.println("🔔🔔 MemberRepository로 들어왔습니다 🔔🔔");
 //		System.out.println("🔔🔔 addOneMember() 함수 실행 🔔🔔");
@@ -53,35 +65,59 @@ public class MemberRequestService {
 //		testNougat0.setRegiUser(map.get("regi_user").toString());
 		//testNougat0.setUseYn("default"); //디폴트값으로 세팅하기 위해 null 전달 (@DynamicInsert)
 
+//		TestNougat0 user_ = memberRepository.findById(testNougat0.getUserId())/* .get() */.orElseGet(null);
+//		if(user_ == null) {
+//			System.out.println("동일한 pk값 없음");
+//		}
+//		else {
+			TestNougat0 user = new TestNougat0();
+			
+			user.setUserNm(testNougat0.getUserNm());
+			user.setPw(testNougat0.getPw());		
+			user.setUserId(testNougat0.getUserId());
+			user.setRegiUser("ADMIN");
+			user.setRegiDt(LocalDateTime.now()); //			
+//		}
 		//테이블 입력
-		return memberRepository.save(testNougat0);
+		return memberRepository.save(user);
 	}
 	
-	public int updateOneMember(
-			Map<String,Object> member
-			//TestNougat0 testNougat0
-			) {
-		// TODO Auto-generated method stub
+	
+	/**
+	 * 회원 한 명 수정하기
+	 * 
+	 * @param testNougat0
+	 * @return testNougat0
+	 */
+	public TestNougat0 updateOneMember(TestNougat0 testNougat0) {
 		
-		return memberRepository.updateOneMember(
-//				testNougat0.getUserId()
-//				testNougat0.getUserId()
-//				,testNougat0.getUserNm()
-//				,testNougat0.getUpdaUser()
-//				,testNougat0.getPw()
-				member.get("userIdAfter").toString(),
-				member.get("userNm").toString(),
-				member.get("updaUser").toString(),
-				member.get("pw").toString(),
-				member.get("userIdBefore").toString()
-				);
+		TestNougat0 user = memberRepository.findById(testNougat0.getUserId()).orElseGet(null);
+		
+		user.setUserNm(testNougat0.getUserNm());
+		user.setPw(testNougat0.getPw());
+		user.setUpdaUser("ADMIN");
+		user.setUpdaDt(LocalDateTime.now());
+		
+		return memberRepository.save(user);
 	}
 
-	//int를 반환하고 싶으면 forEach 각각의 결과로 가져와진 deleteByUserYn 메소드의 결과값들을 전부 세야 함(람다함수로 안될듯)
+	/**
+	 * 회원 1~N명 삭제하기 (Use_Yn): 'N'으로 변경하기
+	 * 
+	 * @param keys
+	 */
 	public void deleteMembers(String[] keys) {
 		// TODO Auto-generated method stub
 		Iterable<String> iterable = Arrays.asList(keys);
-		iterable.forEach((userId)->memberRepository.deleteByUserYn(userId));
+//		iterable.forEach((userId)->memberRepository.deleteByUserYn(userId));
+		System.out.println("🔔API/MemberRequestService.java/deleteMembers🔔");
+		iterable.forEach(key->System.out.println(key));
+		
+		
+		List<TestNougat0> memberList = memberRepository.findAllById(iterable);
+		memberList.forEach(member->member.setUseYn("N"));
+		memberRepository.saveAll(memberList);
+		
 		System.out.println("service.java -> 회원 1~N명 delete 성공");
 	}
 

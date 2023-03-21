@@ -1,19 +1,19 @@
 package com.enssel.verbena.ui.controller;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 @RequestMapping("/page1")
@@ -49,36 +49,34 @@ public class Page1Controller {
 		return new ResponseEntity<Object>( result, HttpStatus.OK);
 	}	
 	
-	@RequestMapping("/regi")
-	public void insertMember(@RequestParam Map<String,Object> member){
-		System.out.println("UI/page1/regi 컨트롤러에서 확인: "+member);
-		System.out.println("확인중");
-		System.out.println(member.get("userNm"));
-		System.out.println(member.get("userId"));
-		System.out.println(member.get("regiUser"));
-		System.out.println(member.get("pw"));
-		System.out.println("확인끝");
-		restTemplate.postForEntity("/page1/regi", member, String.class);
+	@PostMapping("/regi")
+	public ResponseEntity<Object> insertMember(@RequestBody String json) throws JsonProcessingException {
+		//String -> Map	
+		Gson gson = new Gson();
+		Map<String, Object> jsonObject = gson.fromJson(json, new TypeToken<Map<String, Object>>(){}.getType());
+		System.out.println("UI/page1/regi 컨트롤러에서 확인: "+jsonObject);
+		
+		Object result = restTemplate.postForObject("/page1/regi", jsonObject, Object.class);
+		return new ResponseEntity<Object>(result, HttpStatus.OK);
 	}	
+	
 	@RequestMapping("/update")
-	public void updateMember(@RequestParam Map<String,Object> member){
-		System.out.println("UI/page1/update 컨트롤러에서 확인: "+member);
-		System.out.println("확인중");
-		System.out.println(member.get("userNm"));
-		System.out.println(member.get("userIdAfter"));
-		System.out.println(member.get("userIdBefore"));
-		System.out.println(member.get("updaUser"));
-		System.out.println(member.get("pw"));
-		System.out.println("확인끝");
-		restTemplate.postForEntity("/page1/update", member, String.class);
+	public ResponseEntity<Object> updateMember(@RequestBody String json) throws JsonProcessingException {
+		//String -> Map
+		System.out.println("memberJSON:"+json);
+		
+		Gson gson = new Gson();
+		Map<String, Object> jsonObject = gson.fromJson(json,new TypeToken<Map<String, Object>>(){}.getType());
+		System.out.println("UI/page1/update 컨트롤러에서 확인: "+jsonObject);
+		
+		Object result = restTemplate.postForObject("/page1/update", jsonObject, String.class);
+		return new ResponseEntity<Object>(result, HttpStatus.OK);
 	}	
 	@RequestMapping("/delete")
-	public void deleteMember(@RequestParam(value="key[]") String[] keys){
+	public ResponseEntity<Object> deleteMember(String[] keys){
 		System.out.println("UI/page1/delete 입력된 key값 배열 컨트롤러에서 확인: "+keys);
-		System.out.println("확인중");
-		System.out.println(keys);
-		System.out.println("확인끝");
-		restTemplate.postForEntity("/page1/delete", keys, String.class);
+		Object result = restTemplate.postForEntity("/page1/delete", keys, String.class);
+		return new ResponseEntity<Object>(result, HttpStatus.OK);
 	}	
 
 	

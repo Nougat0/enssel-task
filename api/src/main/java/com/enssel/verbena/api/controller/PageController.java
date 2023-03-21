@@ -21,7 +21,7 @@ public class PageController {
 	MemberRequestService memberRequestService;
 	
 	@RequestMapping("/table")
-	public /*String*/ResponseEntity<List<TestNougat0>> table() {
+	public ResponseEntity<List<TestNougat0>> table() {
 		System.out.println("🔔🔔api의 컨트롤러로 들어왔습니다🔔🔔");
 		//테이블 내용 조회
 		List<TestNougat0> memberList = memberRequestService.findAllMembers();
@@ -33,22 +33,18 @@ public class PageController {
 	}
 	
 	@RequestMapping("/regi")
-	public TestNougat0 regi(@RequestBody TestNougat0 member) {
-		return memberRequestService.addOneMember(member);
+	public ResponseEntity<TestNougat0> regi(@RequestBody TestNougat0 member) {
+		TestNougat0 user = memberRequestService.addOneMember(member);
+		return new ResponseEntity<TestNougat0>(user, HttpStatus.OK);
 	}
+	
 	@RequestMapping("/update")
-	public int update(@RequestBody Map<String,Object> member/* TestNougat0 member */) {
-		//테이블 레코드 등록
-		System.out.println("여기서 못 가져오는 거 같은데 update:"+member);
-//		TestNougat0 testNougat0 = new TestNougat0();
-//		testNougat0.setUserId(member.get("userId").toString());
-//		testNougat0.setPw(member.get("pw").toString());
-//		testNougat0.setUserNm(member.get("userNm").toString());
-//		testNougat0.setRegiUser(member.get("regiUser").toString());
+	public ResponseEntity<TestNougat0> update(@RequestBody TestNougat0 member) {
+		TestNougat0 user = memberRequestService.updateOneMember(member);
 		
-		//service의 addOneMember에서 save()를 사용하는데, jpa에서 key값이 중복될 경우 자동으로 수정해준다
-		return memberRequestService.updateOneMember(member); 
+		return new ResponseEntity<TestNougat0>(user, HttpStatus.OK);
 	}
+	
 	@RequestMapping("/delete")
 	public void delete(@RequestBody String[] keys) {
 		//테이블 레코드 등록

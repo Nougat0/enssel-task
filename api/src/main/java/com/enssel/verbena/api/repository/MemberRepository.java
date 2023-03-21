@@ -15,6 +15,12 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface MemberRepository extends JpaRepository<TestNougat0, String> {
 	
+	List<TestNougat0> findByUseYn(String useYn);
+	
+	List<TestNougat0> findByUserId(String userId);
+	
+//	List<TestNougat0> findAllByUserNm(String userNm);
+	
 //	@Modifying
 //	@Transactional
 //	@Query(value="UPDATE test.test.TEST_NOUGAT0 "
