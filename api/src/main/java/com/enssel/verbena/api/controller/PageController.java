@@ -21,15 +21,23 @@ public class PageController {
 	MemberRequestService memberRequestService;
 	
 	@RequestMapping("/table")
-	public ResponseEntity<List<TestNougat0>> table() {
+	public ResponseEntity<List<TestNougat0>> table(@RequestBody(required=false) Map<String, Object> searchForm) {
 		System.out.println("🔔🔔api의 컨트롤러로 들어왔습니다🔔🔔");
-		//테이블 내용 조회
-		List<TestNougat0> memberList = memberRequestService.findAllMembers();
-		System.out.println("🔔🔔memberList 가져왔습니다🔔🔔");
-		;
-		return new ResponseEntity<List<TestNougat0>>(memberList, HttpStatus.OK);
+		System.out.println("searchForm: "+searchForm);
+		if(searchForm == null) {
+			//테이블 내용 조회
+			List<TestNougat0> memberList = memberRequestService.findAllMembers();
+			System.out.println("🔔🔔memberList 가져왔습니다🔔🔔");
+			return new ResponseEntity<List<TestNougat0>>(memberList, HttpStatus.OK);
 //		return "실패";
-//		return "🔔 api 프로젝트의 controller로 REST API 요청 성공 🔔";
+//		return "🔔 api 프로젝트의 controller로 REST API 요청 성공 🔔";			
+		}
+		else {
+			//테이블 내용 조회
+			List<TestNougat0> memberList = memberRequestService.findAllMembers();
+			System.out.println("🔔🔔memberList 가져왔습니다🔔🔔");
+			return new ResponseEntity<List<TestNougat0>>(memberList, HttpStatus.OK);
+		}
 	}
 	
 	@RequestMapping("/regi")
@@ -57,5 +65,8 @@ public class PageController {
 		
 		memberRequestService.deleteMembers(keys);
 	}
+	
+//	@RequestMapping("/search")
+//	public ResponseEntity<TestNougat0> search
 	
 }

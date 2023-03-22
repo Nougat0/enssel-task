@@ -3,12 +3,17 @@ package com.enssel.verbena.api.service;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.enssel.verbena.api.model.QTestNougat0;
 import com.enssel.verbena.api.model.TestNougat0;
 import com.enssel.verbena.api.repository.MemberRepository;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+
+import jakarta.persistence.EntityManager;
 
 /**
  * @author Enssel
@@ -31,6 +36,9 @@ public class MemberRequestService {
 	 */
 	@Autowired
 	private MemberRepository memberRepository;
+	
+	@Autowired
+	EntityManager entityManager;
 
 	public List<TestNougat0> findAllMembers(){
 //		List<TestNougat0> memberList = memberRepository.findAll();
@@ -40,6 +48,13 @@ public class MemberRequestService {
 		return memberList;
 	}
 
+	public List<TestNougat0> search(Map<String, String> params){
+		JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(entityManager);
+		List<TestNougat0> list = jpaQueryFactory.selectFrom(QTestNougat0.testNougat0).fetch();
+		
+		return list;
+	}
+	
 	
 	/**
 	 * 회원 한 명 등록

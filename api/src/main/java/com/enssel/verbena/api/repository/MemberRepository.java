@@ -3,21 +3,20 @@ package com.enssel.verbena.api.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 
 import com.enssel.verbena.api.model.TestNougat0;
 
-import jakarta.transaction.Transactional;
-
 @Repository
-public interface MemberRepository extends JpaRepository<TestNougat0, String> {
+public interface MemberRepository extends JpaRepository<TestNougat0, String>, QuerydslPredicateExecutor<TestNougat0> {
 	
 	List<TestNougat0> findByUseYn(String useYn);
 	
 	List<TestNougat0> findByUserId(String userId);
+	
+	//검색용 메소드 구현
+	//List<TestNougat0> findByUserIdAndUserNmAnd
 	
 //	List<TestNougat0> findAllByUserNm(String userNm);
 	
