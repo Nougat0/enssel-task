@@ -16,9 +16,7 @@ import com.enssel.verbena.api.model.QTestNougat0;
 import com.enssel.verbena.api.model.TestNougat0;
 import com.enssel.verbena.api.repository.MemberRepository;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -295,11 +293,11 @@ public class MemberRequestService {
 	/**
 	 * useYn = "Y" 인 항목만 표시하는 query
 	 */
-	private Predicate useYnEq(String string) {
-		// TODO Auto-generated method stub
-		QTestNougat0 qTestNougat0 = QTestNougat0.testNougat0;
-		return qTestNougat0.useYn.eq(string);
-	}
+//	private Predicate useYnEq(String string) {
+//		// TODO Auto-generated method stub
+//		QTestNougat0 qTestNougat0 = QTestNougat0.testNougat0;
+//		return qTestNougat0.useYn.eq(string);
+//	}
 //
 //
 //	private BooleanExpression updaDtToEq(LocalDateTime updaDtTo) {
