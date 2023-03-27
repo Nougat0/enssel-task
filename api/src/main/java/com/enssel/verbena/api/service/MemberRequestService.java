@@ -88,10 +88,6 @@ public class MemberRequestService {
 	}
 	//허 프로님께서 알려주신 방법: between 함수 사용하기
 	public LocalDateTime convertToTime(String a) {
-//		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//		LocalDateTime convert = LocalDate.parse(a, format).atStartOfDay();
-//		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.sss");
-//		LocalDateTime convert = LocalDate.parse(a, format).atStartOfDay();
 		System.out.println("params로 전달된 string:"+a);
 		
 		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
