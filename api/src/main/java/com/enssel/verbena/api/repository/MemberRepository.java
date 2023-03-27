@@ -15,6 +15,11 @@ public interface MemberRepository extends JpaRepository<TestNougat0, String>, Qu
 	
 	List<TestNougat0> findByUserId(String userId);
 	
+	
+	
+	
+	
+	
 	//검색용 메소드 구현
 	//List<TestNougat0> findByUserIdAndUserNmAnd
 	

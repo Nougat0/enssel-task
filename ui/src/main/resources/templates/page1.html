@@ -169,6 +169,7 @@
 					URL_ADD: "/page1/regi",
 					URL_UPDATE: "/page1/update",
 					URL_DELETE: "/page1/delete",
+					URL_GROUPBY: "/page1/groupBy",
 					
 					//Type
 					TYPE_ADD: '입력',
@@ -188,7 +189,7 @@
 					},
 					grid_init: function(){
 						//처음 띄울 때는 data가 없습니다 띄우고 조회 누르면 보이게 하기
-						GRID.makeGrid(null, ENV_VAL.GRID);
+						GRID.makeGrid(null, ENV_VAL.GRID, GRID.columns, "userId");
 						//GRID_CRUD_SUBMIT.loadDataSource();
 					},
 					btn_init: function(){ //버튼 함수들 모음 (초기화 상태)
@@ -214,7 +215,7 @@
 						$(ENV_VAL.CRUD_FORM).find('input').val('').end();
 					},
 					groupBy_init: function(){
-						GRID.makeGrid(null,ENV_VAL.GRID_GROUPBY);
+						GRID.makeGrid(null,ENV_VAL.GRID_GROUPBY, GRID.columns_groupBy, "regiDate");
 					},
 					reFormAndModal: function(type){
 						switch(type){
@@ -245,8 +246,14 @@
 							if(val.value !== '') flag++;
 						});
 						
-						if(flag == 0) GRID_CRUD_SUBMIT.loadDataSource();
-						else if(flag > 0) VIEW.searchRecord();
+						if(flag == 0) {
+							GRID_CRUD_SUBMIT.loadDataSource(null, ENV_VAL.GRID, GRID.columns, "userId", ENV_VAL.URL_VIEW);
+							GRID_CRUD_SUBMIT.loadDataSource(null, ENV_VAL.GRID_GROUPBY, GRID.columns_groupBy, "regiDate", ENV_VAL.URL_GROUPBY);
+						}
+						else if(flag > 0) {
+							VIEW.searchRecord();
+							
+						}
 						
 						
 
@@ -274,7 +281,8 @@
 						console.log('formJSON::::'+formJSON);
 						//var encodedJSON = encodeURI(formJSON);
 						//console.log('flag::::'+encodedJSON);
-						GRID_CRUD_SUBMIT.loadDataSource(formJSON);
+						GRID_CRUD_SUBMIT.loadDataSource(formJSON, ENV_VAL.GRID, GRID.columns, "userId", ENV_VAL.URL_VIEW);
+						GRID_CRUD_SUBMIT.loadDataSource(formJSON, ENV_VAL.GRID_GROUPBY, GRID.columns_groupBy, "regiDate", ENV_VAL.URL_GROUPBY);
 					},
 					addRecord: function(){
 						VIEW.reFormAndModal('add');
@@ -315,7 +323,8 @@
 						else {
 							console.log('삭제할 배열: '+selectedRows.selectedRowKeys);
 							console.log('삭제할 배열(type): '+typeof selectedRows.selectedRowKeys);
-							console.log('이게 되나? '+selectedRows.selectedRowKeys.forEach(function(){console.log("되나 보기만 함")}))
+							console.log('삭제할 배열(type): '+Array.isArray(selectedRows.selectedRowKeys));
+							console.log('이게 되나? '+selectedRows.selectedRowKeys.forEach(function(){console.log("forEach가 되니까 배열임!")}))
 							
 							GRID_CRUD_SUBMIT.deleteMember(selectedRows.selectedRowKeys);
 							}
@@ -368,16 +377,6 @@
 				// 🔔 Spring 과제 2차 🔔
 				var GRID = { //grid 를 만드는 데 필요한 속성들 정의
 					columns: [{
-						dataField: "regiDt"
-						, caption: "등록일"
-						, dataType: "date"
-						, format: "yyyy-MM-dd"
-					}, {
-						dataField: "regiUser"
-						, caption: "등록자 아이디"
-						//dataType: "text"
-						//데이터 타입 디폴트는 text, 이 경우에는 명시 안해줘도 됨
-					}, {
 						dataField: "userNm"
 						, caption: "이름"
 					}, {
@@ -390,6 +389,16 @@
 						, caption: "비밀번호"
 						, visible: false
 					}, {
+						dataField: "regiDt"
+						, caption: "등록일"
+						, dataType: "date"
+						, format: "yyyy-MM-dd"
+					}, {
+						dataField: "regiUser"
+						, caption: "등록자 아이디"
+						//dataType: "text"
+						//데이터 타입 디폴트는 text, 이 경우에는 명시 안해줘도 됨
+					}, {
 						dataField: "updaDt"
 						, caption: "수정일"
 						, dataType: "date"
@@ -398,14 +407,24 @@
 						dataField: "updaUser"
 						, caption: "수정자 아이디"  //dataField 외에 명시할 속성이 없다면 중괄호 없이 그냥 "컬럼명" 만 추가해도 됨.
 					}]
-					, makeGrid: function (data, selectGrid) {
-						var grid = $(selectGrid).dxDataGrid({
+					, 
+					columns_groupBy:[
+					{
+						dataField: "regiDate"
+						,caption: "등록일"
+						, format: "yyyy-MM-dd"
+					},{	
+						dataField: "accountSum"
+						,caption: "계정 수"
+					}]
+					, makeGrid: function (data, gridSelector, columns, keyExpr) {
+						var grid = $(gridSelector).dxDataGrid({
 							dataSource: data //array 전달, 함수 넣어도 됨 (return 값 전달)
-							, keyExpr: "userId" //pk의 필드명 넘기기
+							, keyExpr: keyExpr //pk의 필드명 넘기기
 							// array 외의 데이터를 넘기고 싶을 경우(JSON) Docs 참고
-							, columns: GRID.columns//사용하는 컬럼정보 배열로 넘기기 [{컬럼1정보},{컬럼2정보},{컬럼3정보}]
+							, columns: columns//사용하는 컬럼정보 배열로 넘기기 [{컬럼1정보},{컬럼2정보},{컬럼3정보}]
 							, noDataText: "데이터가🔔없습니다"
-							, allowColumnResizing: true
+							, allowColumnResizing: false
 							, columnAutoWith: true
 							, columnFixing: { enabled: true }
 							, sorting: { mode: "single" } //정렬 옵션을 단일정렬만 하기. (다중 정렬x)
@@ -449,17 +468,18 @@
 				}///GRID
 
 				var GRID_CRUD_SUBMIT = {
-					loadDataSource: function(searchForm){
+					loadDataSource: function(searchForm, gridSelector, columns, keyExpr, url){
 						
 						$.ajax({
-							url: ENV_VAL.URL_VIEW, 
+							url: url, 
 							type: 'post',
 							//search 인수 전달 시 data 전달하기... 컨트롤러에서 null 체크하기
 							data: searchForm,						
 							dataType: 'json',
 							contentType: "application/json; charset=UTF-8",
 							success: function (data, status, xhr) {
-								GRID.makeGrid(data, ENV_VAL.GRID);
+								//GRID.makeGrid(data, ENV_VAL.GRID, GRID.columns, "userId");
+								GRID.makeGrid(data, gridSelector, columns, keyExpr);
 								//console.log('data.Columns: ' + data.Columns);
 								//console.log('GRID.Columns: ' + GRID.Columns);
 								//alert('ajax로 새로 데이터를 받아왔어요');
@@ -470,6 +490,25 @@
 							}
 						});
 						//console.log('ajax로 새로 데이터를 받아왔어요');
+					}
+					, loadGroupByDataSource: function(searchForm){
+						$.ajax({
+							url: ENV_VAL.URL_GROUPBY,
+							type: 'post',
+							data: searchForm,
+							dataType: 'json',
+							contentType: "application/json; charset=UTF-8",
+							success: function (data, status, xhr) {
+								GRID.makeGrid(data, ENV_VAL.GRID_GROUPBY, GRID.columns_groupBy, "regiDate");
+								//console.log('data.Columns: ' + data.Columns);
+								//console.log('GRID.Columns: ' + GRID.Columns);
+								//alert('ajax로 새로 데이터를 받아왔어요');
+							},
+							error: function (request, status, error) {
+								alert('데이터 로드중 오류 발생');
+								console.log('request.status: ' + request.status + 'status: ' + status + 'error: ' + error);
+							}							
+						})
 					}
 					, addMember: function (form) {
 						//ajax로 db에 데이터 입력 요청
@@ -482,7 +521,7 @@
 							//contentType: "application/x-www-form-urlencoded; charset=UTF-8",
 							contentType: 'application/json',
 							success: function (data, status, xhr) {
-								GRID_CRUD_SUBMIT.loadDataSource();
+								GRID_CRUD_SUBMIT.loadDataSource(null, ENV_VAL.GRID, GRID.columns, "userId", ENV_VAL.URL_VIEW);
 								alert('정상 입력되었습니다');
 								console.log('data: ' + data);
 							},
@@ -503,7 +542,7 @@
 							//contentType: "application/x-www-form-urlencoded; charset=UTF-8",        //////////
 							contentType: 'application/json', //serializeObject
 							success: function (data, status, xhr) {
-								GRID_CRUD_SUBMIT.loadDataSource();
+								GRID_CRUD_SUBMIT.loadDataSource(null, ENV_VAL.GRID, GRID.columns, "userId", ENV_VAL.URL_VIEW);
 								alert('정상 수정되었습니다');
 								console.log('data: ' + data);
 							},
@@ -521,12 +560,9 @@
 							type: 'post',
 							data: {key: key},
 							dataType: 'json',
-							//dataType: 'text',
-							//traditional: true,
-							//contentType: "application/x-www-form-urlencoded; charset=UTF-8", //배열을 넘길 거라서
-							contentType: 'application/json',
+							contentType: "application/x-www-form-urlencoded; charset=UTF-8", //배열을 넘길 거라서
 							success: function (data, status, xhr) {
-								GRID_CRUD_SUBMIT.loadDataSource();
+								GRID_CRUD_SUBMIT.loadDataSource(null, ENV_VAL.GRID, GRID.columns, "userId", ENV_VAL.URL_VIEW);
 								alert('정상 삭제되었습니다');
 								console.log('data: ' + data);
 							},

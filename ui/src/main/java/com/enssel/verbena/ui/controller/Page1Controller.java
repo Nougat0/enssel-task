@@ -59,6 +59,28 @@ public class Page1Controller {
 
 		
 	}	
+	@RequestMapping("/groupBy")
+	public ResponseEntity<Object> getGroupByRow(@RequestBody(required=false) String json) {
+		System.out.println("검색폼json: "+json);
+		if(json == null) { //검색 안 넘길 시
+			Object result =  restTemplate.getForObject("/page1/groupBy", Object.class); //O
+			//Gson gson = new Gson();
+			//List<Map<String,Object>> jsonObject = gson.fromJson(result, new TypeToken<Object>(){}.getType());
+			
+			return new ResponseEntity<Object>( result, HttpStatus.OK);
+		}
+		else { //검색할 것 넘길 시 - String json 은 넘어온 검색 항목들을 포함하고 있음
+			Gson gson = new Gson();
+			Map<String, Object> jsonObject = gson.fromJson(json, new TypeToken<Map<String, Object>>(){}.getType());
+			Object result =  restTemplate.postForObject("/page1/groupBy", jsonObject ,Object.class); //O
+			//Gson gson = new Gson();
+			//List<Map<String,Object>> jsonObject = gson.fromJson(result, new TypeToken<Object>(){}.getType());
+			
+			return new ResponseEntity<Object>( result, HttpStatus.OK);			
+		}
+		
+		
+	}	
 	
 	@PostMapping("/regi")
 	public ResponseEntity<Object> insertMember(@RequestBody String json) throws JsonProcessingException {
@@ -87,7 +109,7 @@ public class Page1Controller {
 		return new ResponseEntity<Object>(result, HttpStatus.OK);
 	}	
 	@RequestMapping("/delete")
-	public ResponseEntity<Object> deleteMember(@RequestParam(value="key[]") String[] keys){
+	public ResponseEntity<Object> deleteMember(@RequestParam(value="key[]") String [] keys){
 		System.out.println("UI/page1/delete 입력된 key값 배열 컨트롤러에서 확인: "+keys);
 		Object result = restTemplate.postForEntity("/page1/delete", keys, String.class);
 		return new ResponseEntity<Object>(result, HttpStatus.OK);
