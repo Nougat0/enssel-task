@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.enssel.verbena.api.dto.DataSearchParams;
 import com.enssel.verbena.api.dto.GroupByGridRows;
-import com.enssel.verbena.api.model.TestNougat0;
+import com.enssel.verbena.api.model.TestNougat0User;
 import com.enssel.verbena.api.service.DataGridSearchService;
 import com.enssel.verbena.api.service.MemberRequestService;
 
@@ -26,7 +26,7 @@ public class PageController {
 	DataGridSearchService dataGridSearchService;
 	
 	@RequestMapping("/table")
-	public ResponseEntity<List<TestNougat0>> table(@RequestBody(required=false) DataSearchParams searchForm) {
+	public ResponseEntity<List<TestNougat0User>> table(@RequestBody(required=false) DataSearchParams searchForm) {
 		System.out.println("🔔🔔api의 컨트롤러로 들어왔습니다🔔🔔");
 		System.out.println("searchForm: "+searchForm);
 		
@@ -43,10 +43,10 @@ public class PageController {
 			
 			
 			//테이블 내용 조회
-			List<TestNougat0> memberList = memberRequestService.findBySearchForm(searchForm);
+			List<TestNougat0User> memberList = memberRequestService.findBySearchForm(searchForm);
 			System.out.println("🔔🔔memberList 가져왔습니다🔔🔔 :: 검색조건 전달됨!"+searchForm);
 			System.out.println("검색결과 "+memberList.size()+" 개의 레코드가 전달되었습니다");
-			return new ResponseEntity<List<TestNougat0>>(memberList, HttpStatus.OK);
+			return new ResponseEntity<List<TestNougat0User>>(memberList, HttpStatus.OK);
 			
 			
 		//}
@@ -61,16 +61,16 @@ public class PageController {
 	}
 	
 	@RequestMapping("/regi")
-	public ResponseEntity<TestNougat0> regi(@RequestBody TestNougat0 member) {
-		TestNougat0 user = memberRequestService.addOneMember(member);
-		return new ResponseEntity<TestNougat0>(user, HttpStatus.OK);
+	public ResponseEntity<TestNougat0User> regi(@RequestBody TestNougat0User member) {
+		TestNougat0User user = memberRequestService.addOneMember(member);
+		return new ResponseEntity<TestNougat0User>(user, HttpStatus.OK);
 	}
 	
 	@RequestMapping("/update")
-	public ResponseEntity<TestNougat0> update(@RequestBody TestNougat0 member) {
-		TestNougat0 user = memberRequestService.updateOneMember(member);
+	public ResponseEntity<TestNougat0User> update(@RequestBody TestNougat0User member) {
+		TestNougat0User user = memberRequestService.updateOneMember(member);
 		
-		return new ResponseEntity<TestNougat0>(user, HttpStatus.OK);
+		return new ResponseEntity<TestNougat0User>(user, HttpStatus.OK);
 	}
 	
 	@RequestMapping("/delete")

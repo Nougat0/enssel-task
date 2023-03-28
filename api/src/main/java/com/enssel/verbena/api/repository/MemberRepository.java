@@ -6,14 +6,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 
-import com.enssel.verbena.api.model.TestNougat0;
+import com.enssel.verbena.api.model.TestNougat0User;
 
 @Repository
-public interface MemberRepository extends JpaRepository<TestNougat0, String>, QuerydslPredicateExecutor<TestNougat0> {
+public interface MemberRepository extends JpaRepository<TestNougat0User, String>, QuerydslPredicateExecutor<TestNougat0User> {
 	
-	List<TestNougat0> findByUseYn(String useYn);
+	List<TestNougat0User> findByUseYn(String useYn);
 	
-	List<TestNougat0> findByUserId(String userId);
+	List<TestNougat0User> findByUserId(String userId);
 	
 	
 	

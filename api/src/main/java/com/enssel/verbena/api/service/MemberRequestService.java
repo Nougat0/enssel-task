@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.enssel.verbena.api.dto.DataSearchParams;
 import com.enssel.verbena.api.dto.GroupByGridRows;
-import com.enssel.verbena.api.model.QTestNougat0;
-import com.enssel.verbena.api.model.TestNougat0;
+
+import com.enssel.verbena.api.model.QTestNougat0User;
+
+import com.enssel.verbena.api.model.TestNougat0User;
 import com.enssel.verbena.api.repository.MemberRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
@@ -46,7 +48,7 @@ public class MemberRequestService {
 	private MemberRepository memberRepository;
 	
 //	@Autowired
-	private QTestNougat0 qTestNougat0;
+	private QTestNougat0User qTestNougat0User;
 
 	@Autowired
 	private JPAQueryFactory jpaQueryFactory;
@@ -61,9 +63,9 @@ public class MemberRequestService {
 	
 	//public final BooleanExpression operation = Expressions.booleanOperation(Ops.BETWEEN, dataSearchParams.);
 
-	public List<TestNougat0> findAllMembers(){
+	public List<TestNougat0User> findAllMembers(){
 //		List<TestNougat0> memberList = memberRepository.findAll();
-		List<TestNougat0> memberList = memberRepository.findByUseYn("Y");
+		List<TestNougat0User> memberList = memberRepository.findByUseYn("Y");
 		return memberList;
 	}
 	
@@ -104,9 +106,9 @@ public class MemberRequestService {
 	 * @param DataSearchParams params
 	 * @return
 	 */
-	public List<TestNougat0> findBySearchForm(DataSearchParams params){
+	public List<TestNougat0User> findBySearchForm(DataSearchParams params){
 		BooleanBuilder builder = new BooleanBuilder();
-		QTestNougat0 qTestNougat0 = QTestNougat0.testNougat0;
+		QTestNougat0User qTestNougat0 = QTestNougat0User.testNougat0User;
 		//[1] BooleanBuilder 사용방법
 		if(params != null) {
 			System.out.println(params.toString());
@@ -151,7 +153,7 @@ public class MemberRequestService {
 		builder.and(qTestNougat0.useYn.eq("Y"));
 
 		return jpaQueryFactory
-				.selectFrom(QTestNougat0.testNougat0)
+				.selectFrom(QTestNougat0User.testNougat0User)
 				.where(builder)
 				.fetch();
 		
@@ -190,7 +192,7 @@ public class MemberRequestService {
 	
 	public List<GroupByGridRows> findBySearchFormGroupBy(DataSearchParams params){
 		BooleanBuilder builder = new BooleanBuilder();
-		QTestNougat0 qTestNougat0 = QTestNougat0.testNougat0;
+		QTestNougat0User qTestNougat0 = QTestNougat0User.testNougat0User;
 		
 //		ComparableExpression<String> dateFormatRegiDt = Expressions.stringTemplate(
 //				"CONVERT(CHAR(10), {0}, 120)",
@@ -263,7 +265,7 @@ public class MemberRequestService {
 						qTestNougat0.userNm.count().as("accountSum"), 
 						dateFormat.as("regiDate")
 					))
-				.from(QTestNougat0.testNougat0)
+				.from(QTestNougat0User.testNougat0User)
 				.where(builder)
 				.groupBy(dateFormat)
 				.fetch();
@@ -362,10 +364,10 @@ public class MemberRequestService {
 	/**
 	 * 회원 한 명 등록
 	 * 
-	 * @param testNougat0
+	 * @param testNougat0User
 	 * @return testNougat0
 	 */
-	public TestNougat0 addOneMember(TestNougat0 testNougat0){
+	public TestNougat0User addOneMember(TestNougat0User testNougat0User){
 //		System.out.println("🔔🔔 MemberRepository로 들어왔습니다 🔔🔔");
 //		System.out.println("🔔🔔 addOneMember() 함수 실행 🔔🔔");
 		//Map<String,Object> map = new HashMap<>();
@@ -388,16 +390,16 @@ public class MemberRequestService {
 //			System.out.println("동일한 pk값 없음");
 //		}
 //		else {
-			TestNougat0 user = new TestNougat0();
+		TestNougat0User user = new TestNougat0User();
 			
-			user.setUserNm(testNougat0.getUserNm());
-			user.setPw(testNougat0.getPw());		
-			user.setUserId(testNougat0.getUserId());
+			user.setUserNm(testNougat0User.getUserNm());
+			user.setPw(testNougat0User.getPw());		
+			user.setUserId(testNougat0User.getUserId());
 			user.setRegiUser("ADMIN");
 			user.setRegiDt(LocalDateTime.now()); //	
 			
-			jpaQueryFactory.insert(qTestNougat0).set(qTestNougat0.userId,testNougat0.getUserId());
-			
+			jpaQueryFactory.insert(qTestNougat0User).set(qTestNougat0User.userId,testNougat0User.getUserId());
+			//jpaQueryFactory.insert(qTestNougat0).set(qTestNougat0.userId,testNougat0.getUserId());
 //		}
 		//테이블 입력
 		return memberRepository.save(user);
@@ -407,15 +409,15 @@ public class MemberRequestService {
 	/**
 	 * 회원 한 명 수정하기
 	 * 
-	 * @param testNougat0
+	 * @param testNougat0User
 	 * @return testNougat0
 	 */
-	public TestNougat0 updateOneMember(TestNougat0 testNougat0) {
+	public TestNougat0User updateOneMember(TestNougat0User testNougat0User) {
 		
-		TestNougat0 user = memberRepository.findById(testNougat0.getUserId()).orElseGet(null);
+		TestNougat0User user = memberRepository.findById(testNougat0User.getUserId()).orElseGet(null);
 		
-		user.setUserNm(testNougat0.getUserNm());
-		user.setPw(testNougat0.getPw());
+		user.setUserNm(testNougat0User.getUserNm());
+		user.setPw(testNougat0User.getPw());
 		user.setUpdaUser("ADMIN");
 		user.setUpdaDt(LocalDateTime.now());
 		
@@ -435,7 +437,7 @@ public class MemberRequestService {
 		iterable.forEach(key->System.out.println(key));
 		
 		
-		List<TestNougat0> memberList = memberRepository.findAllById(iterable);
+		List<TestNougat0User> memberList = memberRepository.findAllById(iterable);
 		memberList.forEach(member->member.setUseYn("N"));
 		memberRepository.saveAll(memberList);
 		

@@ -4,13 +4,22 @@
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     </head>
+    <style> 
+		
+	</style>
     <body>
-        <div layout:fragment="content"></div>
+		<div class="row">
+			<div class="col-sm-3">
+				<th:block th:replace="~{fragments/sidebar :: sidebar}"></th>
+			</div>
+			<div class="col-sm-9">
+		        <th:block layout:fragment="content"></th>
+			</div>
+		</div>
         <script th:inline="javascript">
 
         </script>
-        <th:block layout:fragment="script">
-
-        </th:block>
+    	<th:block layout:fragment="side-script"></th:block>
+        <th:block layout:fragment="script"></th:block>
     </body>
 </html>

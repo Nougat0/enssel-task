@@ -1,0 +1,82 @@
+<html xmlns:th="http://www.thymeleaf.org">
+	
+	<body>
+		
+	<div th:fragment="sidebar" style="background-color: lightpink;">
+		<h3>사이드바 fragment입니다</h3>
+		<div id="menuTreeView"></div>
+	
+		<th:block th:fragment="side-script">
+			<script type="text/javascript">
+				$(() => {
+					var VIEW = {
+						init: function(){
+							VIEW.treeView_init();
+						},
+						treeView_init: function(){
+							MENU.makeTreeView();
+						}
+					}
+					
+					var TREE = {
+//						menu_data: [{
+//						id: '1',
+//							text: '전체메뉴',
+//							expanded: true,
+//							items: [{
+//								id: '2',
+//								text: '사용자 관리',
+//							},{
+//								id: '3',
+//								text: '메뉴 관리'
+//							}]
+//						}]
+						makeTreeView: function(data){
+							  var treeView = $('#menuTreeView').dxTreeView({
+							    items: data,
+							    keyExpr: "menuId",
+							    displayExpr: "menuNm",
+							    //itemExpr: "", //하위 메뉴 전달
+							    parentIdExpr: "uprMenuId",
+							    width: 300,
+							    onItemClick(e) {
+							      console.log('key로 뭐가 있나요'+Object.keys(e));
+							      //data에 가져와진 url 을 여기서 사용할 수 있나?
+							      alert("메뉴:"+e.itemElement)
+							    },
+							  }).dxTreeView('instance');
+							return treeView;
+						}
+						, showMenu: function(){
+							
+						}
+					}
+					
+					var TREE_CRUD_SUBMIT = {
+						loadDataSource: function(){
+							$.ajax({
+								url: '/page2/table',
+								type: 'post',
+								contentType: "application/json; charset=UTF-8",
+								success: function(data){
+									TREE.makeTreeView(data);
+								},
+								error: function(request, status, error){
+									alert('treeView 데이터 로드 중 에러 발생');
+									console.log('request.status: '+request.status+', status: '+status+", error: "+error);
+								}
+							})
+						}
+					}
+					
+					//초기화
+					VIEW.init();
+					
+				});
+			</script>
+		</th:block>
+	
+	</div>
+	
+	</body>
+</html>
