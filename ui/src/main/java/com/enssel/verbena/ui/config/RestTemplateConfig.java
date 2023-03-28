@@ -15,23 +15,35 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Configuration
 public class RestTemplateConfig {
 	
-	String resourceURI = "http://localhost:8082/";
+	String userURI = "http://localhost:8082/";
+	String menuURI = "http://localhost:8083/";
 	
 	/**
 	 * RestTemplate에 대한 @Bean 설정하는 메소드
 	 * 
 	 * @return 설정된 템플릿을 반환
 	 */
-	@Bean
-	public RestTemplate restTemplate() {
+	@Bean("userRestTemplate")
+	public RestTemplate userRestTemplate() {
 		RestTemplate restTemplate = new RestTemplate();
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(userURI);
+		restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(builder));
 		
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(resourceURI);
-        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(builder));
-        
-        // 허프로님께 질문 할 것
-        
-        return restTemplate;
+		// 허프로님께 질문 할 것
+		
+		return restTemplate;
+	}
+	
+	
+	@Bean("menuRestTemplate")
+	public RestTemplate menuRestTemplate() {
+		RestTemplate restTemplate = new RestTemplate();
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(menuURI);
+		restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(builder));
+		
+		// 허프로님께 질문 할 것
+		
+		return restTemplate;
 	}
 	
 }
