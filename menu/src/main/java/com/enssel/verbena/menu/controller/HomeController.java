@@ -10,7 +10,7 @@ public class HomeController {
 	@ResponseBody
 	@RequestMapping("/")
 	public String home() {
-		return "Spring 과제 1 :: api 프로젝트입니다";
+		return "MSA 과제 1 :: menu 프로젝트입니다";
 	}
 	
 }

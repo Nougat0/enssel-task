@@ -45,20 +45,20 @@ public class MenuRequestService {
 	
 	//public final BooleanExpression operation = Expressions.booleanOperation(Ops.BETWEEN, dataSearchParams.);
 
-	public List<TestNougat0Menu> findAllMembers(){
-//		List<TestNougat0> memberList = memberRepository.findAll();
-		List<TestNougat0Menu> menuList = menuRepository.findByUseYn("Y");
-		return menuList;
-	}
+//	public List<TestNougat0Menu> findAllMembers(){
+////		List<TestNougat0> memberList = memberRepository.findAll();
+//		List<TestNougat0Menu> menuList = menuRepository.findByUseYn("Y");
+//		return menuList;
+//	}
 
-	public void deleteMembers(String[] keys) {
+	public void deleteMenu(String[] keys) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public List<TestNougat0Menu> findBySearchForm(String searchForm) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<TestNougat0Menu> showMenu() {
+		List<TestNougat0Menu> menuList = menuRepository.findByUseYn("Y");
+		return menuList;
 	}
 
 	public List findBySearchFormGroupBy(String searchForm) {
@@ -66,14 +66,32 @@ public class MenuRequestService {
 		return null;
 	}
 
-	public TestNougat0Menu updateOneMember(TestNougat0Menu member) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	public TestNougat0Menu updateOneMember(TestNougat0Menu member) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 
-	public TestNougat0Menu addOneMember(TestNougat0Menu member) {
-		// TODO Auto-generated method stub
-		return null;
+	public TestNougat0Menu addOneMenu(TestNougat0Menu testNougat0Menu) {
+		TestNougat0Menu menu = new TestNougat0Menu();
+		menu.setMenuId(testNougat0Menu.getMenuId());
+		menu.setMenuNm(testNougat0Menu.getMenuNm());
+		menu.setSort(0);
+		
+		if(testNougat0Menu.getUprMenuId() == -1) //null 과 비교가 안 되네
+			menu.setUprMenuId(0);
+		else 
+			menu.setUprMenuId(0);
+//			menu.setUprMenuId(testNougat0Menu.getUprMenuId());
+		
+		menu.setUrl("http://localhost:8081/page2"+"/menu"+testNougat0Menu.getMenuId());
+		menu.setUseYn("Y");
+		menu.setRegiUser(testNougat0Menu.getRegiUser());
+
+//		jpaQueryFactory
+//			.insert(qTestNougat0Menu)
+//			.set(qTestNougat0Menu.menuId, testNougat0Menu.getMenuId());
+		
+		return menuRepository.save(menu);
 	}
 
 }
