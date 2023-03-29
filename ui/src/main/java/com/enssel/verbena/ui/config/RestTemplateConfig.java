@@ -18,15 +18,19 @@ public class RestTemplateConfig {
 	String userURI = "http://localhost:8082/";
 	String menuURI = "http://localhost:8083/";
 	
+	private String zuul = "localhost:12400/";
+	
 	/**
 	 * RestTemplate에 대한 @Bean 설정하는 메소드
 	 * 
 	 * @return 설정된 템플릿을 반환
 	 */
-	@Bean("userRestTemplate")
+	@Bean(name="userRestTemplate")
 	public RestTemplate userRestTemplate() {
 		RestTemplate restTemplate = new RestTemplate();
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(userURI);
+		//UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://"+zuul+apiType);
+		
 		restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(builder));
 		
 		// 허프로님께 질문 할 것
@@ -35,7 +39,7 @@ public class RestTemplateConfig {
 	}
 	
 	
-	@Bean("menuRestTemplate")
+	@Bean(name="menuRestTemplate")
 	public RestTemplate menuRestTemplate() {
 		RestTemplate restTemplate = new RestTemplate();
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(menuURI);

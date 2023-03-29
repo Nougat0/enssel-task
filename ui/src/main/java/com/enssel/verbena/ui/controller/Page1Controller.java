@@ -3,6 +3,7 @@ package com.enssel.verbena.ui.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,7 @@ public class Page1Controller {
 	
 	
 	@Autowired
+	@Qualifier("userRestTemplate")
 	private RestTemplate userRestTemplate;
 	
 //	@RequestMapping("/table")
@@ -40,6 +42,10 @@ public class Page1Controller {
 	@RequestMapping("/table")
 	public ResponseEntity<Object> getTableRow(@RequestBody(required=false) String json) {
 		System.out.println("검색폼json: "+json);
+		
+		HomeController hc = new HomeController();
+		System.out.println("Page1Controller/getTableRow():"+hc.getRoutes().toString());
+		
 		if(json == null) { //검색 안 넘길 시
 			Object result =  userRestTemplate.getForObject("/page1/table", Object.class); //O
 			//Gson gson = new Gson();
