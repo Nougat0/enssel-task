@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.enssel.verbena.api.dto.DataSearchParams;
 import com.enssel.verbena.api.dto.GroupByGridRows;
-
 import com.enssel.verbena.api.model.QTestNougat0User;
-
 import com.enssel.verbena.api.model.TestNougat0User;
 import com.enssel.verbena.api.repository.MemberRepository;
 import com.querydsl.core.BooleanBuilder;
