@@ -13,7 +13,7 @@ import com.enssel.verbena.menu.model.TestNougat0Menu;
 import com.enssel.verbena.menu.service.MenuRequestService;
 
 @RestController
-@RequestMapping("/page2")
+//@RequestMapping("/page2")
 public class PageController {
 	
 	@Autowired
@@ -21,7 +21,7 @@ public class PageController {
 	
 	@RequestMapping("/table")
 	public ResponseEntity<List<TestNougat0Menu>> table() {
-		System.out.println("🔔🔔menu의 컨트롤러로 들어왔습니다🔔🔔");
+		System.out.println("🔔🔔menu의 컨트롤러(/table)로 들어왔습니다🔔🔔");
 
 		//테이블 내용 조회
 		List<TestNougat0Menu> menuList = menuRequestService.showMenu();
@@ -31,7 +31,7 @@ public class PageController {
 	
 	@RequestMapping("/regi")
 	public ResponseEntity<TestNougat0Menu> regi(@RequestBody TestNougat0Menu menu) {
-		System.out.println("PageController.java로 들어왔습니다");
+		System.out.println("PageController.java (/regi)로 들어왔습니다");
 		TestNougat0Menu menu_ = menuRequestService.addOneMenu(menu);
 		return new ResponseEntity<TestNougat0Menu>(menu_, HttpStatus.OK);
 	}
@@ -44,7 +44,7 @@ public class PageController {
 //	}
 	
 	@RequestMapping("/delete")
-	public void delete(@RequestBody String[] keys) {
+	public void delete(@RequestBody Integer[] keys) {
 		//테이블 레코드 등록
 		System.out.println("여기서 못 가져오는 거 같은데 delete:"+keys);
 //		TestNougat0 testNougat0 = new TestNougat0();
@@ -53,7 +53,7 @@ public class PageController {
 //		testNougat0.setUserNm(member.get("userNm").toString());
 //		testNougat0.setRegiUser(member.get("regiUser").toString());
 		
-		menuRequestService.deleteMenu(keys);
+		menuRequestService.deleteMenus(keys);
 	}
 	
 //	@RequestMapping("/search")

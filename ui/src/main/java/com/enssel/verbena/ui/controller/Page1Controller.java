@@ -26,10 +26,13 @@ public class Page1Controller {
 	// @Autowired
 	// private RestTemplateTest restTemplateTest;
 	
-	
 	@Autowired
-	@Qualifier("userRestTemplate")
-	private RestTemplate userRestTemplate;
+	private RestTemplate restTemplate;
+	
+	
+//	@Autowired
+//	@Qualifier("userRestTemplate")
+//	private RestTemplate userRestTemplate;
 	
 //	@RequestMapping("/table")
 //	public ResponseEntity<String> getTableRow() {
@@ -47,7 +50,8 @@ public class Page1Controller {
 		System.out.println("Page1Controller/getTableRow():"+hc.getRoutes().toString());
 		
 		if(json == null) { //검색 안 넘길 시
-			Object result =  userRestTemplate.getForObject("/page1/table", Object.class); //O
+			Object result =  restTemplate.getForObject("/page1/table", Object.class); //O
+//			Object result =  userRestTemplate.getForObject("/page1/table", Object.class); //O
 			//Gson gson = new Gson();
 			//List<Map<String,Object>> jsonObject = gson.fromJson(result, new TypeToken<Object>(){}.getType());
 			
@@ -56,7 +60,8 @@ public class Page1Controller {
 		else { //검색할 것 넘길 시 - String json 은 넘어온 검색 항목들을 포함하고 있음
 			Gson gson = new Gson();
 			Map<String, Object> jsonObject = gson.fromJson(json, new TypeToken<Map<String, Object>>(){}.getType());
-			Object result =  userRestTemplate.postForObject("/page1/table", jsonObject ,Object.class); //O
+			Object result =  restTemplate.postForObject("/page1/table", jsonObject ,Object.class); //O
+//			Object result =  userRestTemplate.postForObject("/page1/table", jsonObject ,Object.class); //O
 			//Gson gson = new Gson();
 			//List<Map<String,Object>> jsonObject = gson.fromJson(result, new TypeToken<Object>(){}.getType());
 			
@@ -69,7 +74,8 @@ public class Page1Controller {
 	public ResponseEntity<Object> getGroupByRow(@RequestBody(required=false) String json) {
 		System.out.println("검색폼json: "+json);
 		if(json == null) { //검색 안 넘길 시
-			Object result =  userRestTemplate.getForObject("/page1/groupBy", Object.class); //O
+			Object result =  restTemplate.getForObject("/page1/groupBy", Object.class); //O
+//			Object result =  userRestTemplate.getForObject("/page1/groupBy", Object.class); //O
 			//Gson gson = new Gson();
 			//List<Map<String,Object>> jsonObject = gson.fromJson(result, new TypeToken<Object>(){}.getType());
 			
@@ -78,7 +84,8 @@ public class Page1Controller {
 		else { //검색할 것 넘길 시 - String json 은 넘어온 검색 항목들을 포함하고 있음
 			Gson gson = new Gson();
 			Map<String, Object> jsonObject = gson.fromJson(json, new TypeToken<Map<String, Object>>(){}.getType());
-			Object result =  userRestTemplate.postForObject("/page1/groupBy", jsonObject ,Object.class); //O
+			Object result =  restTemplate.postForObject("/page1/groupBy", jsonObject ,Object.class); //O
+//			Object result =  userRestTemplate.postForObject("/page1/groupBy", jsonObject ,Object.class); //O
 			//Gson gson = new Gson();
 			//List<Map<String,Object>> jsonObject = gson.fromJson(result, new TypeToken<Object>(){}.getType());
 			
@@ -95,7 +102,8 @@ public class Page1Controller {
 		Map<String, Object> jsonObject = gson.fromJson(json, new TypeToken<Map<String, Object>>(){}.getType());
 		System.out.println("UI/page1/regi 컨트롤러에서 확인: "+jsonObject);
 		
-		Object result = userRestTemplate.postForObject("/page1/regi", jsonObject, Object.class);
+//		Object result = userRestTemplate.postForObject("/page1/regi", jsonObject, Object.class);
+		Object result = restTemplate.postForObject("/page1/regi", jsonObject, Object.class);
 		return new ResponseEntity<Object>(result, HttpStatus.OK);
 	}	
 	
@@ -111,13 +119,15 @@ public class Page1Controller {
 		//jsonObject = gson.fromJson(json, jsonObject.getClass());
 		System.out.println("UI/page1/update 컨트롤러에서 확인: "+jsonObject);
 		
-		Object result = userRestTemplate.postForObject("/page1/update", jsonObject, String.class);
+		Object result = restTemplate.postForObject("/page1/update", jsonObject, String.class);
+//		Object result = userRestTemplate.postForObject("/page1/update", jsonObject, String.class);
 		return new ResponseEntity<Object>(result, HttpStatus.OK);
 	}	
 	@RequestMapping("/delete")
 	public ResponseEntity<Object> deleteMember(@RequestParam(value="key[]") String [] keys){
 		System.out.println("UI/page1/delete 입력된 key값 배열 컨트롤러에서 확인: "+keys);
-		Object result = userRestTemplate.postForEntity("/page1/delete", keys, String.class);
+		Object result = restTemplate.postForEntity("/page1/delete", keys, String.class);
+//		Object result = userRestTemplate.postForEntity("/page1/delete", keys, String.class);
 		return new ResponseEntity<Object>(result, HttpStatus.OK);
 	}	
 	

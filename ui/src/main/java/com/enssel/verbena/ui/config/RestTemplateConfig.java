@@ -18,19 +18,13 @@ public class RestTemplateConfig {
 	String userURI = "http://localhost:8082/";
 	String menuURI = "http://localhost:8083/";
 	
-	private String zuul = "localhost:12400/";
+//	@Value()
+	private String zuul = "http://localhost:12400/";
 	
-	/**
-	 * RestTemplate에 대한 @Bean 설정하는 메소드
-	 * 
-	 * @return 설정된 템플릿을 반환
-	 */
-	@Bean(name="userRestTemplate")
-	public RestTemplate userRestTemplate() {
+	@Bean
+	public RestTemplate RestTemplate() {
 		RestTemplate restTemplate = new RestTemplate();
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(userURI);
-		//UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://"+zuul+apiType);
-		
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(zuul);
 		restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(builder));
 		
 		// 허프로님께 질문 할 것
@@ -38,16 +32,41 @@ public class RestTemplateConfig {
 		return restTemplate;
 	}
 	
+//	/**
+//	 * RestTemplate에 대한 @Bean 설정하는 메소드
+//	 * 
+//	 * @return 설정된 템플릿을 반환
+//	 */
+//	@Bean(name="userRestTemplate")
+//	public RestTemplate userRestTemplate() {
+//		RestTemplate restTemplate = new RestTemplate();
+//		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(userURI);
+//		//UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://"+zuul+apiType);
+//		
+//		restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(builder));
+//		
+//		// 허프로님께 질문 할 것
+//		
+//		return restTemplate;
+//	}
 	
-	@Bean(name="menuRestTemplate")
-	public RestTemplate menuRestTemplate() {
-		RestTemplate restTemplate = new RestTemplate();
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(menuURI);
-		restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(builder));
-		
-		// 허프로님께 질문 할 것
-		
-		return restTemplate;
-	}
+	
+//	/**
+//	 * 메뉴 bean
+//	 * 
+//	 * @return
+//	 */
+//	@Bean(name="menuRestTemplate")
+//	public RestTemplate menuRestTemplate() {
+//		RestTemplate restTemplate = new RestTemplate();
+//		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(menuURI);
+//		restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(builder));
+//		
+//		// 허프로님께 질문 할 것
+//		
+//		return restTemplate;
+//	}
+	
+	
 	
 }

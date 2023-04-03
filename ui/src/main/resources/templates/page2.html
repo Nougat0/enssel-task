@@ -31,46 +31,6 @@
 			<div class="col-md-12">
 				<div class="box">
 					<div class="box-header with-bordered">
-						<h4>조회 Form</h4>
-					</div>
-					<div class="box-body">
-						<div class="col-md-12">
-							<form id="searchForm" method="GET" action="/page1/search">
-								<div class="col-md-2 form-group">
-									<label>이름</label>
-									<input type="text" name="userNm" class="form-control" placeholder="이름 입력"/>
-								</div>
-								<div class="col-md-2 form-group">
-									<label>아이디</label>
-									<input type="text" name="userId" class="form-control" placeholder="아이디 입력"/>
-								</div>
-								<div class="col-md-2 form-group">
-									<label>등록일</label>
-									<input type="date" name="regiDtFrom" class="form-control" />
-									<input type="date" name="regiDtTo" class="form-control" />
-								</div>
-								<div class="col-md-2 form-group">
-									<label>등록자</label>
-									<input type="text" name="regiUser" class="form-control" placeholder="등록자 아이디 입력"/>
-								</div>
-								<div class="col-md-2 form-group">
-									<label>수정일</label>
-									<input type="date" name="updaDtFrom" class="form-control" />
-									<input type="date" name="updaDtTo" class="form-control" />
-								</div>
-								<div class="col-md-2 form-group">
-									<label>수정자</label>
-									<input type="text" name="updaUser" class="form-control" placeholder="수정자 아이디 입력"/>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-			<hr/>
-			<div class="col-md-12">
-				<div class="box">
-					<div class="box-header with-bordered">
 						<h4>TEST_NOUGAT0_MENU 메뉴 조회</h4>
 					</div>
 					<div class="box-body">
@@ -92,12 +52,17 @@
 								<label>메뉴 이름:</label>
 								<input type="text" class="form-control" placeholder="이름을 입력하세요" name="menuNm">
 								<br />
+								<!--
 								<label>메뉴 아이디:</label>
 								<input type="text" class="form-control" placeholder="아이디를 입력하세요" name="menuId">
 								<br />
+								-->
 								<label>상위 메뉴 지정:</label>
-								<!-- select list -->
-								<input type="text" class="form-control" placeholder="상위메뉴를 고르세요" name="uprMenuId">
+								<label class="form-label">Select list (select one):</label>
+							    <select class="form-select" placeholder="상위메뉴를 고르세요" name="uprMenuId">							    
+								<!-- select list options -->
+								<option value="0">root</option>
+							    </select>
 								<br />
 								<label>등록자 아이디:</label>
 								<input type="text" class="form-control" placeholder="ADMIN" value="ADMIN" name="regiUser" id="inputForChange">
@@ -116,10 +81,7 @@
 		</div>
 	</div>
 	<th:block layout:fragment="script">
-		<!--script type="text/javascript" src="http://localhost:8081/ui/src/main/resources/templates/js/menu.js"></script-->
-		<script type="text/javascript">
-
-		</script>
+		<script type="text/javascript" th:src="@{/js/page2.js}"></script>
 	</th:block>
 </body>
 

@@ -16,7 +16,7 @@ import com.enssel.verbena.api.service.DataGridSearchService;
 import com.enssel.verbena.api.service.MemberRequestService;
 
 @RestController
-@RequestMapping("/page1")
+//@RequestMapping("/page1")
 public class PageController {
 	
 	@Autowired

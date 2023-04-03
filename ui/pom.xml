@@ -56,6 +56,14 @@
 			<version>4.0.0</version>
 		</dependency>
 		
+		
+		<!--부트스트랩이 zuul에서는 안 먹혀서 혹시나하고 추가해봄-->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bootstrap</artifactId>
+			<version>4.0.2</version>
+		</dependency>
+		
 	</dependencies>
 
 	<build>

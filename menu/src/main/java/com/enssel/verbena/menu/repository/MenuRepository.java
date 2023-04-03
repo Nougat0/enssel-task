@@ -13,4 +13,6 @@ public interface MenuRepository extends JpaRepository<TestNougat0Menu, String>, 
 
 	List<TestNougat0Menu> findByUseYn(String string);
 
+//	List<TestNougat0Menu> findAllByMenuId(Iterable<Integer> iterable);
+
 }

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,12 +20,11 @@ import com.google.gson.reflect.TypeToken;
 public class Page2Controller {
 	
 	@Autowired
-	@Qualifier("menuRestTemplate")
-	private RestTemplate menuRestTemplate;
+	private RestTemplate restTemplate;
 	
 	@RequestMapping("/table")
 	public ResponseEntity<Object> getMenuRow(){
-		Object result = menuRestTemplate.getForObject("/page2/table", Object.class);
+		Object result = restTemplate.getForObject("/page2/table", Object.class);
 		return new ResponseEntity<Object>( result, HttpStatus.OK);
 	}
 	@RequestMapping("/regi")
@@ -33,8 +33,14 @@ public class Page2Controller {
 		
 		Gson gson = new Gson();
 		Map<String, Object> jsonObject = gson.fromJson(json, new TypeToken<Map<String, Object>>(){}.getType());
-		Object result = menuRestTemplate.postForObject("/page2/regi", jsonObject, Object.class);
+		Object result = restTemplate.postForObject("/page2/regi", jsonObject, Object.class);
 		return new ResponseEntity<Object>( result, HttpStatus.OK);
+	}
+	@RequestMapping("/delete")
+	public ResponseEntity<Object> deleteMenuRow(@RequestParam(value="key[]") Integer [] keys){
+		System.out.println("UI/page2/delete 입력된 key값 배열 컨트롤러에서 확인: "+keys);
+		Object result = restTemplate.postForEntity("/page2/delete", keys, Integer.class);		
+		return new ResponseEntity<Object>(result, HttpStatus.OK);
 	}
 	
 	
