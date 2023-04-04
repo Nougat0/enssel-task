@@ -22,15 +22,6 @@ import jakarta.transaction.Transactional;
 @Service
 public class MenuRequestService {
 	
-//	
-//	public DataSearchResult dataSearch(DataGridParam dgp, String compCd) {
-//
-//        DataGridSearchService<VInspectionRequest> searchServ =  new DataGridSearchService<VInspectionRequest>(QVInspectionRequest.class, vinspRequRepo, dgp); 
-//        return searchServ.getDataGridSearchResult();
-//
-//	}
-	
-	
 	/**
 	 * 회원 읽어오기
 	 */
@@ -38,32 +29,17 @@ public class MenuRequestService {
 	private MenuRepository menuRepository;
 	
 //	@Autowired
-	private QTestNougat0Menu qTestNougat0Menu;
+//	private QTestNougat0Menu qTestNougat0Menu;
 
 	@Autowired
 	private JPAQueryFactory jpaQueryFactory;
 
 	@Autowired
 	EntityManager entityManager;
-	
-	//public final BooleanExpression operation = Expressions.booleanOperation(Ops.BETWEEN, dataSearchParams.);
-
-//	public List<TestNougat0Menu> findAllMembers(){
-////		List<TestNougat0> memberList = memberRepository.findAll();
-//		List<TestNougat0Menu> menuList = menuRepository.findByUseYn("Y");
-//		return menuList;
-//	}
 
 	@Transactional
 	public void deleteMenus(Integer [] keys) {
-		// TODO Auto-generated method stub
-//		Iterable<Integer> iterable = Arrays.asList(keys);
-//		System.out.println("🔔API/MemberRequestService.java/deleteMembers🔔");
-//		iterable.forEach(key->key.toString()); 
-//
-//		List<TestNougat0Menu> memberList = menuRepository.findAllById(iterable);
-//		memberList.forEach(member->member.setUseYn("N"));
-//		menuRepository.saveAll(memberList);
+
 		QTestNougat0Menu qTestNougat0Menu = QTestNougat0Menu.testNougat0Menu;
 		
 		BooleanBuilder builder = new BooleanBuilder();
@@ -83,18 +59,12 @@ public class MenuRequestService {
 		return menuList;
 	}
 
-
-//	public TestNougat0Menu updateOneMember(TestNougat0Menu member) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
 	public TestNougat0Menu addOneMenu(TestNougat0Menu testNougat0Menu) {
 		TestNougat0Menu menu = new TestNougat0Menu();
 //		menu.setMenuId("NEXT VALUE FOR test.SEQ_DATA_ID");
 		menu.setMenuId(selectLastId()+1);
 		menu.setMenuNm(testNougat0Menu.getMenuNm());
-		menu.setSort(0);
+		menu.setSort(selectLastSort(testNougat0Menu.getSort())+1);
 		
 		menu.setUprMenuId(testNougat0Menu.getUprMenuId());
 
@@ -105,20 +75,16 @@ public class MenuRequestService {
 		menu.setUseYn("Y");
 		menu.setRegiUser(testNougat0Menu.getRegiUser());
 		menu.setRegiDt(LocalDateTime.now());
-
-//		jpaQueryFactory
-//			.insert(qTestNougat0Menu)
-//			.set(qTestNougat0Menu.menuId, testNougat0Menu.getMenuId());
-		
 		return menuRepository.save(menu);
 	}
 	
-	//Sequence 사용하기 위한 메소드
+	/**
+	 * Sequence 사용하기 위한 메소드
+	 * 
+	 * @return 제일 큰 값(가장 마지막으로 입력된)의 menuId int
+	 */
 	public int selectLastId() {
-//		BooleanBuilder builder = new BooleanBuilder();
-//		builder.and(qTestNougat0Menu.useYn.eq("Y"));
 		QTestNougat0Menu qTestNougat0Menu = QTestNougat0Menu.testNougat0Menu;
-		TestNougat0Menu menu = new TestNougat0Menu();
 		int lastId;
 		try {
 			lastId = jpaQueryFactory
@@ -136,6 +102,68 @@ public class MenuRequestService {
 
 		
 		return lastId;
+	}
+	
+	
+	/**
+	 * 같은 부모 아래 sort를 가져오기 위한 메소드
+	 * 
+	 * @param uprMenuId
+	 * @return
+	 */
+	public int selectLastSort(int uprMenuId) {
+		QTestNougat0Menu qTestNougat0Menu = QTestNougat0Menu.testNougat0Menu;
+		int lastSort;
+		
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qTestNougat0Menu.useYn.eq("Y"));
+		builder.and(qTestNougat0Menu.uprMenuId.eq(uprMenuId));
+		
+		try {
+		lastSort = jpaQueryFactory
+				.select(qTestNougat0Menu.sort)
+				.from(qTestNougat0Menu)
+				.where(builder)
+				.orderBy(qTestNougat0Menu.sort.desc())
+				.fetchFirst();
+		}
+		catch(NullPointerException e) {
+			e.printStackTrace();
+			lastSort = 1;
+		}
+
+		return lastSort;
+	}
+	
+	/**
+	 * 모달창을 활용한 메뉴 1개 수정하기
+	 * 
+	 * @param testNougat0Menu
+	 * @return
+	 */
+	public TestNougat0Menu updateMenu(TestNougat0Menu testNougat0Menu) {
+		TestNougat0Menu menu = menuRepository.findById(testNougat0Menu.getMenuId()).orElseGet(null);
+		
+		menu.setMenuNm(testNougat0Menu.getMenuNm());
+		menu.setUrl(testNougat0Menu.getUrl());
+		menu.setUpdaUser("ADMIN");
+		menu.setUpdaDt(LocalDateTime.now());
+
+		return menu;
+	}
+	
+	/**
+	 * 드래그 & 드롭으로 메뉴 이동 시 sort 순서 기억하기
+	 * 
+	 * 생각해보니까 이동한 애도 바꿔야 하지만 기존 것도 바꿔야 하네
+	 * 해당 부모를 가져와서 부모 하위 애들을 전부 바꿔야 하네
+	 * 
+	 * @param testNougat0Menu
+	 */
+	public void updateMenuSort(TestNougat0Menu testNougat0Menu) {
+		TestNougat0Menu menu = menuRepository.findById(testNougat0Menu.getMenuId()).orElseGet(null);
+		
+		menu.setSort(testNougat0Menu.getSort());
 	}
 
 }

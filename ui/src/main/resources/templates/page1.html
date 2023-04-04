@@ -179,29 +179,29 @@
 					
 					
 				}
-
 				var VIEW = {
 					init : function(){										
-						VIEW.grid_init();
-						VIEW.btn_init();
-						VIEW.modal_init();
-						VIEW.search_init();
-						VIEW.groupBy_init();
+						VIEW.gridInit();
+						VIEW.btnInit();
+						VIEW.modalInit();
+						VIEW.searchInit();
+						VIEW.groupByInit();
 					},
-					grid_init: function(){
+					gridInit: function(){
 						//처음 띄울 때는 data가 없습니다 띄우고 조회 누르면 보이게 하기
 						GRID.makeGrid(null, ENV_VAL.GRID, GRID.columns, "userId");
-						//GRID_CRUD_SUBMIT.loadDataSource();
 					},
-					btn_init: function(){ //버튼 함수들 모음 (초기화 상태)
+					btnInit: function(){ //버튼 함수들 모음 (초기화 상태)
 						//button 이벤트 binding
 						$(ENV_VAL.BTN_INIT).click(VIEW.viewRecord);
 						$(ENV_VAL.BTN_ADD).click(VIEW.addRecord);
 						$(ENV_VAL.BTN_UPDATE).click(VIEW.updateRecord);
 						$(ENV_VAL.BTN_DELETE).click(VIEW.deleteRecord);
 					},
-					modal_init: function(){
-						//$(ENV_VAL.MODAL).click(VIEW.openModal); ///아아아악
+					modalInit: function(){
+						// 모달 닫히기 전 (배경클릭) 확인하기
+						//$(ENV_VAL.MODAL).on('hide.bs.modal', VIEW.confirmBeforeClose);
+						
 						$(ENV_VAL.MODAL_CLOSE).click(VIEW.confirmBeforeClose);
 						$(ENV_VAL.MODAL_SUBMIT).click(VIEW.submitModal);	
 						
@@ -209,13 +209,11 @@
 						$(ENV_VAL.ID_INPUT_CHANGE).removeAttr('name');
 						$(ENV_VAL.CRUD_FORM+' input[name='+ENV_VAL.COL_USERID+']').prop('readonly',false);
 						$(ENV_VAL.CRUD_FORM).find('input').val('').end();
-						
-						//$('.box-body').hide();
 					},
-					search_init: function(){
+					searchInit: function(){
 						$(ENV_VAL.CRUD_FORM).find('input').val('').end();
 					},
-					groupBy_init: function(){
+					groupByInit: function(){
 						GRID.makeGrid(null,ENV_VAL.GRID_GROUPBY, GRID.columns_groupBy, "regiDate");
 					},
 					reFormAndModal: function(type){
@@ -223,7 +221,7 @@
 							case "add":
 								$(ENV_VAL.MODAL+' .modal-title').text('회원 입력');
 								$(ENV_VAL.CRUD_FORM).attr('action',ENV_VAL.URL_ADD);
-								$(ENV_VAL.ID_INPUT_CHANGE).attr('name',ENV_VAL.REGIUSER);
+								$(ENV_VAL.ID_INPUT_CHANGE).attr('name',ENV_VAL.COL_REGIUSER);
 								$(ENV_VAL.ID_INPUT_CHANGE).val('ADMIN');
 								$(ENV_VAL.ID_INPUT_CHANGE).prop('readonly',true);
 								$(ENV_VAL.ID_INPUT_CHANGE).prev().text('등록자 아이디:');
@@ -231,7 +229,7 @@
 							case "update":
 								$(ENV_VAL.MODAL+' .modal-title').text('회원 수정');
 								$(ENV_VAL.CRUD_FORM).attr('action',ENV_VAL.URL_UPDATE);
-								$(ENV_VAL.ID_INPUT_CHANGE).attr('name',ENV_VAL.UPDAUSER);
+								$(ENV_VAL.ID_INPUT_CHANGE).attr('name',ENV_VAL.COL_UPDAUSER);
 								$(ENV_VAL.ID_INPUT_CHANGE).val('ADMIN');
 								$(ENV_VAL.CRUD_FORM+' input[name='+ENV_VAL.COL_USERID+']').prop('readonly',true);
 								$(ENV_VAL.ID_INPUT_CHANGE).prop('readonly',true);
@@ -241,9 +239,7 @@
 					},
 					viewRecord: function(){
 						var flag = 0;
-						//Array.from($(ENV_VAL.SEARCH_FORM+' input')).forEach(function(val, idx){
 						Array.from(document.querySelector(ENV_VAL.SEARCH_FORM).getElementsByTagName('input')).forEach(function(val, idx){
-							console.log(idx+':idx'+val+':val')
 							if(val.value !== '') flag++;
 						});
 						
@@ -251,37 +247,16 @@
 							GRID_CRUD_SUBMIT.loadDataSource(null, ENV_VAL.GRID, GRID.columns, "userId", ENV_VAL.URL_VIEW);
 							GRID_CRUD_SUBMIT.loadDataSource(null, ENV_VAL.GRID_GROUPBY, GRID.columns_groupBy, "regiDate", ENV_VAL.URL_GROUPBY);
 						}
-						else if(flag > 0) {
+						else if(flag > 0) 
 							VIEW.searchRecord();
-							
-						}
-						
-						
-
-
-												
-						//$('.box-body').show();
 					},
 					searchRecord: function(){
-						console.log('궁금해!!!'+$(ENV_VAL.SEARCH_FORM+' input[name='+ENV_VAL.COL_).length);
-						
-						
-						
-						
 						var obj = {};
 						var form = $(ENV_VAL.SEARCH_FORM).serializeArray();
-						console.log('form::::'+form)
-						
 						$.map(form, function(value, index){
-							//console.log(index+':'+value);
 							obj[value['name']] = value['value'];
 						});
-
-						console.log('obj::::'+obj);
 						var formJSON = JSON.stringify(obj);
-						console.log('formJSON::::'+formJSON);
-						//var encodedJSON = encodeURI(formJSON);
-						//console.log('flag::::'+encodedJSON);
 						GRID_CRUD_SUBMIT.loadDataSource(formJSON, ENV_VAL.GRID, GRID.columns, "userId", ENV_VAL.URL_VIEW);
 						GRID_CRUD_SUBMIT.loadDataSource(formJSON, ENV_VAL.GRID_GROUPBY, GRID.columns_groupBy, "regiDate", ENV_VAL.URL_GROUPBY);
 					},
@@ -305,7 +280,6 @@
 						var data = selectedRows.selectedRowsData[0];
 						$(ENV_VAL.CRUD_FORM+' input[name='+ENV_VAL.COL_USERNM+']').val(data.userNm);
 						$(ENV_VAL.CRUD_FORM+' input[name='+ENV_VAL.COL_USERID+']').val(data.userId); //2개 선택
-						//$('input[name='+ENV_VAL.COL_PW+']').val(data.pw);
 						$(ENV_VAL.CRUD_FORM+' input[name='+ENV_VAL.COL_UPDAUSER+']').val(data.updaUser);
 						
 						VIEW.reFormAndModal('update');
@@ -322,13 +296,8 @@
 						//n개의 행 삭제하시겠습니까? confirm
 						else if (!confirm(selectedRows.selectedRowKeys.length + '명의 정보를 삭제하시겠습니까?')) return false;
 						else {
-							console.log('삭제할 배열: '+selectedRows.selectedRowKeys);
-							console.log('삭제할 배열(type): '+typeof selectedRows.selectedRowKeys);
-							console.log('삭제할 배열(type): '+Array.isArray(selectedRows.selectedRowKeys));
-							console.log('이게 되나? '+selectedRows.selectedRowKeys.forEach(function(){console.log("forEach가 되니까 배열임!")}))
-							
 							GRID_CRUD_SUBMIT.deleteMember(selectedRows.selectedRowKeys);
-							}
+						}
 											
 					},
 
@@ -358,7 +327,7 @@
 						else VIEW.closeModal();			
 					},
 					closeModal: function(){
-						//VIEW.modal_init();	
+						//VIEW.modalInit();	
 						//modal 닫기
 						//document.getElementById('recordModal').
 						//$(ENV_VAL.MODAL).hide();
@@ -445,27 +414,6 @@
 						}).dxDataGrid("instance"); // instance 가져와서 담기
 						return grid;
 					}
-					/*
-					, loadDataSource: function () {
-						
-						$.ajax({
-							url: '/page1/table',
-							dataType: 'json',
-							contentType: "application/json; charset=UTF-8",
-							success: function (data, status, xhr) {
-								GRID.makeGrid(data);
-								//console.log('data.Columns: ' + data.Columns);
-								//console.log('GRID.Columns: ' + GRID.Columns);
-								//alert('ajax로 새로 데이터를 받아왔어요');
-							},
-							error: function (request, status, error) {
-								alert('데이터 로드중 오류 발생');
-								console.log('request.status: ' + request.status + 'status: ' + status + 'error: ' + error);
-							}
-						});
-						//console.log('ajax로 새로 데이터를 받아왔어요');
-					}
-					*/
 				}///GRID
 
 				var GRID_CRUD_SUBMIT = {
@@ -479,11 +427,7 @@
 							dataType: 'json',
 							contentType: "application/json; charset=UTF-8",
 							success: function (data, status, xhr) {
-								//GRID.makeGrid(data, ENV_VAL.GRID, GRID.columns, "userId");
 								GRID.makeGrid(data, gridSelector, columns, keyExpr);
-								//console.log('data.Columns: ' + data.Columns);
-								//console.log('GRID.Columns: ' + GRID.Columns);
-								//alert('ajax로 새로 데이터를 받아왔어요');
 							},
 							error: function (request, status, error) {
 								alert('데이터 로드중 오류 발생');
@@ -501,9 +445,6 @@
 							contentType: "application/json; charset=UTF-8",
 							success: function (data, status, xhr) {
 								GRID.makeGrid(data, ENV_VAL.GRID_GROUPBY, GRID.columns_groupBy, "regiDate");
-								//console.log('data.Columns: ' + data.Columns);
-								//console.log('GRID.Columns: ' + GRID.Columns);
-								//alert('ajax로 새로 데이터를 받아왔어요');
 							},
 							error: function (request, status, error) {
 								alert('데이터 로드중 오류 발생');
@@ -517,14 +458,11 @@
 							url: ENV_VAL.URL_ADD,
 							type: 'post',
 							data: form, //form태그에 serialize() + JSON.stringify()
-							//dataType: 'json',
 							dataType: 'text',
-							//contentType: "application/x-www-form-urlencoded; charset=UTF-8",
 							contentType: 'application/json',
 							success: function (data, status, xhr) {
 								GRID_CRUD_SUBMIT.loadDataSource(null, ENV_VAL.GRID, GRID.columns, "userId", ENV_VAL.URL_VIEW);
 								alert('정상 입력되었습니다');
-								console.log('data: ' + data);
 							},
 							error: function (request, status, error) {
 								alert('입력 중 에러');
@@ -538,14 +476,11 @@
 							url: ENV_VAL.URL_UPDATE,
 							type: 'post',
 							data: form,
-							//dataType: 'json',
-							dataType: 'text',  ///////////?????
-							//contentType: "application/x-www-form-urlencoded; charset=UTF-8",        //////////
+							dataType: 'text',  
 							contentType: 'application/json', //serializeObject
 							success: function (data, status, xhr) {
 								GRID_CRUD_SUBMIT.loadDataSource(null, ENV_VAL.GRID, GRID.columns, "userId", ENV_VAL.URL_VIEW);
 								alert('정상 수정되었습니다');
-								console.log('data: ' + data);
 							},
 							error: function (request, status, error) {
 								alert('수정 중 에러');
@@ -565,7 +500,6 @@
 							success: function (data, status, xhr) {
 								GRID_CRUD_SUBMIT.loadDataSource(null, ENV_VAL.GRID, GRID.columns, "userId", ENV_VAL.URL_VIEW);
 								alert('정상 삭제되었습니다');
-								console.log('data: ' + data);
 							},
 							error: function (request, status, error) {
 								alert('삭제 중 에러');
@@ -612,7 +546,6 @@
 							obj[value['name']] = value['value'];
 						});
 
-						//var formJSON = JSON.stringify(form);
 						var formJSON = JSON.stringify(obj);
 						switch (type) {
 							case "add": 
@@ -623,18 +556,14 @@
 								break;
 							default:console.log("이상하다 왜 여기로 들어오지?"); break;
 							}
-						//GRID_MODAL.modalClose(type);
-						console.log('validation 및 '+type+'과정 진행완료');
 					}
 					, ifBlankReturnFalse: function (type, inputClass, message) {
 						if ($('#' + type + 'RecordForm > input[class=' + inputClass + ']').val() == '') {
 							alert(message + '을(를) 입력하세요');
-							
 							return false;
 						}
 					}
 				}///GRID_CRUD_SUBMIT
-
 
 				//초기화
 				VIEW.init();

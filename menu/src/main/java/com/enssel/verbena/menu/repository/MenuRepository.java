@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.enssel.verbena.menu.model.TestNougat0Menu;
 
 @Repository
-public interface MenuRepository extends JpaRepository<TestNougat0Menu, String>, QuerydslPredicateExecutor<TestNougat0Menu> {
+public interface MenuRepository extends JpaRepository<TestNougat0Menu, Integer>, QuerydslPredicateExecutor<TestNougat0Menu> {
 
 	List<TestNougat0Menu> findByUseYn(String string);
 

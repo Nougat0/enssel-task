@@ -39,14 +39,13 @@ $(function () {
 
 	var VIEW = {
 		init : function(){										
-			VIEW.sidebar_init();
+			VIEW.sidebarInit();
 		},
-		sidebar_init: function(){
+		sidebarInit: function(){
 			//사이드바는 항상 메뉴가 보여야 하기 때문에 메뉴랑 분리
 			MENU_CRUD_SUBMIT.loadDataSource(ENV_VAL.SIDEBARVIEW, "none");
 		}	
 	}
-
 
 	// 🔔 MSA 과제 1차 🔔
 	var MENU = {
@@ -78,7 +77,7 @@ $(function () {
 			$.ajax({
 				url: ENV_VAL.URL_VIEW, 
 				type: 'post',
-				dataType: 'json',
+/*				dataType: 'json',*/
 				success: function (data, status, xhr) {
 					MENU.makeTreeView(data, tagSelector, checkBoxStatus);
 				},

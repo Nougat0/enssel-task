@@ -3,7 +3,6 @@ package com.enssel.verbena.ui.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +26,7 @@ public class Page2Controller {
 		Object result = restTemplate.getForObject("/page2/table", Object.class);
 		return new ResponseEntity<Object>( result, HttpStatus.OK);
 	}
+	
 	@RequestMapping("/regi")
 	public ResponseEntity<Object> addMenuRow(@RequestBody String json){
 		System.out.println("page2Controller.java로 들어왔습니다");
@@ -36,6 +36,7 @@ public class Page2Controller {
 		Object result = restTemplate.postForObject("/page2/regi", jsonObject, Object.class);
 		return new ResponseEntity<Object>( result, HttpStatus.OK);
 	}
+	
 	@RequestMapping("/delete")
 	public ResponseEntity<Object> deleteMenuRow(@RequestParam(value="key[]") Integer [] keys){
 		System.out.println("UI/page2/delete 입력된 key값 배열 컨트롤러에서 확인: "+keys);

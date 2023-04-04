@@ -35,28 +35,11 @@ public class PageController {
 		TestNougat0Menu menu_ = menuRequestService.addOneMenu(menu);
 		return new ResponseEntity<TestNougat0Menu>(menu_, HttpStatus.OK);
 	}
-	
-//	@RequestMapping("/update")
-//	public ResponseEntity<TestNougat0Menu> update(@RequestBody TestNougat0Menu member) {
-//		TestNougat0Menu user = menuRequestService.updateOneMember(member);
-//		
-//		return new ResponseEntity<TestNougat0Menu>(user, HttpStatus.OK);
-//	}
-	
+
 	@RequestMapping("/delete")
 	public void delete(@RequestBody Integer[] keys) {
 		//테이블 레코드 등록
-		System.out.println("여기서 못 가져오는 거 같은데 delete:"+keys);
-//		TestNougat0 testNougat0 = new TestNougat0();
-//		testNougat0.setUserId(member.get("userId").toString());
-//		testNougat0.setPw(member.get("pw").toString());
-//		testNougat0.setUserNm(member.get("userNm").toString());
-//		testNougat0.setRegiUser(member.get("regiUser").toString());
-		
 		menuRequestService.deleteMenus(keys);
 	}
-	
-//	@RequestMapping("/search")
-//	public ResponseEntity<TestNougat0> search
 	
 }
