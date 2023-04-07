@@ -50,7 +50,6 @@ $(function () {
 	// 🔔 MSA 과제 1차 🔔
 	var MENU = {
 		makeTreeView: function(data, tagSelector, checkBoxStatus){
-			console.log("data:"+data);
 			var treeView = $(tagSelector).dxTreeView({
 			    items: data,
 			    noDataText: "데이터가🔔없습니다",

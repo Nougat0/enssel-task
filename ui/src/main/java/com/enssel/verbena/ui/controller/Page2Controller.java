@@ -44,5 +44,12 @@ public class Page2Controller {
 		return new ResponseEntity<Object>(result, HttpStatus.OK);
 	}
 	
+	@RequestMapping("/sort")
+	public ResponseEntity<Object> sortMenu(@RequestBody Map<String, Object> sortBeforeAfterMenu){
+
+		Object result = restTemplate.postForObject("/page2/sort", sortBeforeAfterMenu, Object.class);
+		return new ResponseEntity<Object>(result, HttpStatus.OK);
+	}
+	
 	
 }

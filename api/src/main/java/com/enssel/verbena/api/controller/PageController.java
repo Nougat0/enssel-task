@@ -89,4 +89,17 @@ public class PageController {
 //	@RequestMapping("/search")
 //	public ResponseEntity<TestNougat0> search
 	
+	// 🔔 MSA 과제 2차 🔔
+//	@RequestMapping("/getNm")
+//	public ResponseEntity<List<UserIdToNmData>> getNm(@RequestBody List<UserIdToNmData> memberInfoList){
+//		List<UserIdToNmData> memberList = memberRequestService.findNmFromId(memberInfoList);
+//		return new ResponseEntity<List<UserIdToNmData>>(memberList, HttpStatus.OK);
+//	}
+	
+	@RequestMapping("/getNm")
+	public ResponseEntity<String> getNm(@RequestBody String userId){
+		String userNm = memberRequestService.findNmFromId(userId);
+		return new ResponseEntity<String>(userNm, HttpStatus.OK);
+	}
+	
 }

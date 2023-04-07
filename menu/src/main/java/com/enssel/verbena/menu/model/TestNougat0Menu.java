@@ -19,7 +19,7 @@ public class TestNougat0Menu implements Serializable{
 	
 	@Id
 	@Column(name="MENU_ID")
-	private int menuId;
+	private Integer menuId;
 	
 	@Column(name="MENU_NM")
 	private String menuNm;
@@ -37,10 +37,10 @@ public class TestNougat0Menu implements Serializable{
 	private String updaUser;
 	
 	@Column(name="SORT")
-	private int sort;
+	private Integer sort;
 	
 	@Column(name="UPR_MENU_ID")
-	private int uprMenuId;
+	private Integer uprMenuId;
 	
 	@Column(name="REGI_DT")
 	private LocalDateTime regiDt;
@@ -48,11 +48,11 @@ public class TestNougat0Menu implements Serializable{
 	@Column(name="UPDA_DT")
 	private LocalDateTime updaDt;
 
-	public int getMenuId() {
+	public Integer getMenuId() {
 		return menuId;
 	}
 
-	public void setMenuId(int menuId) {
+	public void setMenuId(Integer menuId) {
 		this.menuId = menuId;
 	}
 
@@ -96,19 +96,19 @@ public class TestNougat0Menu implements Serializable{
 		this.updaUser = updaUser;
 	}
 
-	public int getSort() {
+	public Integer getSort() {
 		return sort;
 	}
 
-	public void setSort(int sort) {
+	public void setSort(Integer sort) {
 		this.sort = sort;
 	}
 
-	public int getUprMenuId() {
+	public Integer getUprMenuId() {
 		return uprMenuId;
 	}
 
-	public void setUprMenuId(int uprMenuId) {
+	public void setUprMenuId(Integer uprMenuId) {
 		this.uprMenuId = uprMenuId;
 	}
 

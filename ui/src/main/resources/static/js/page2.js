@@ -11,7 +11,7 @@ $(function () {
 		BTN_DELETE : '#deleteRecord',
 		
 		//Tree
-		MENUVIEW : '#treeViewContainer',
+		MENULIST : '#treeListContainer',
 		SIDEBARVIEW : '#sidebarContainer',
 
 		//Modal
@@ -39,8 +39,7 @@ $(function () {
 		URL_ADD: "/page2/regi",
 		URL_UPDATE: "/page2/update",
 		URL_DELETE: "/page2/delete",
-		//그냥 update 해도 되지 않을까
-		//URL_SORT: "/page2/sort",
+		URL_SORT: "/page2/sort",
 		
 		//Type
 		TYPE_ADD: '등록',
@@ -56,7 +55,7 @@ $(function () {
 		},
 		treeViewInit: function(){
 			//처음 띄울 때는 data가 없습니다 띄우고 조회 누르면 보이게 하기
-			MENU.makeTreeList(null, ENV_VAL.MENUVIEW, "multiple");
+			MENU.makeTreeList(null, ENV_VAL.MENULIST, "multiple");
 
 		},
 		btnInit: function(){ //버튼 함수들 모음 (초기화 상태)
@@ -92,8 +91,8 @@ $(function () {
 					$(ENV_VAL.ID_INPUT_CHANGE).val('ADMIN');
 					$(ENV_VAL.ID_INPUT_CHANGE).prop('readonly',true);
 					
-					$(ENV_VAL.CRUD_FORM+' input[name='+ENV_VAL.COL_URL+']').prev().hide();
-					$(ENV_VAL.CRUD_FORM+' input[name='+ENV_VAL.COL_URL+']').prop('type', 'hidden');
+/*					$(ENV_VAL.CRUD_FORM+' input[name='+ENV_VAL.COL_URL+']').prev().hide();
+					$(ENV_VAL.CRUD_FORM+' input[name='+ENV_VAL.COL_URL+']').prop('type', 'hidden');*/
 					
 					$(ENV_VAL.ID_INPUT_CHANGE).prev().text('등록자 아이디:');
 					break;
@@ -120,7 +119,8 @@ $(function () {
 			VIEW.openModal();
 		},
 		viewRecord: function(){
-			MENU_CRUD_SUBMIT.loadDataSource(ENV_VAL.MENUVIEW, "multiple", "treeList");
+			MENU_CRUD_SUBMIT.loadDataSource(ENV_VAL.MENULIST, "multiple", "treeList");
+			
 		},
 		updateRecord: function(){
 			var flag;
@@ -195,16 +195,27 @@ $(function () {
 	}
 
 
-	// 🔔 Spring 과제 2차 🔔
+	// 🔔 MSA 과제 1차 🔔
 	var MENU = {
 		menuColumns: [{
+			dataField: "menuNm",
+			caption: "메뉴이름",
+		},{
+			dataField: "menuId",
+			caption: "메뉴 번호",
+		},{
+			dataField: "uprMenuId",
+			caption: "상위메뉴",
+		},{
 			dataField: "sort",
 			caption: "순서",
 			sortOrder: "asc",
-			visible: false
 		},{
-			dataField: "menuNm",
-			caption: "메뉴이름",
+			dataField: "useYn",
+			caption: "사용여부"
+		},{
+			dataField: "url",
+			caption: "주소",	
 		},{
 			dataField: "regiUser",
 			caption: "등록자",
@@ -227,6 +238,7 @@ $(function () {
 			caption: "메뉴이름"
 		}],
 		makeTreeList: function(data, tagSelector, checkBoxStatus){
+			
 			var treeList = $(tagSelector).dxTreeList({
 			    dataSource: data,
 			    columns: MENU.menuColumns,
@@ -236,8 +248,7 @@ $(function () {
 			    keyExpr: "menuId",
 			    parentIdExpr: "uprMenuId",
 			    autoExpandAll: true,
-			    //줄무늬 row
-			    //rowAlternationEnabled: true,
+			    rowAlternationEnabled: true, //줄무늬 row
 			    rowDragging:{
 					allowReordering: true,
 					allowDropInsideItem: true,
@@ -249,114 +260,65 @@ $(function () {
 					e.fromIndex: 기존 인덱스번호 (위에서부터 순차적 0~)
 					e.toIndex: 옮길 인덱스번호 (드래그 도중에도 변경됨)
 					*/
-					
-/*					onDragChange(e){
-				        const visibleRows = treeList.getVisibleRows();
-				        /*
-				        sourceNode.data.uprMenuId = 부모의 아이디
-				        sourceNode.data.sort = 기존 sort 순번
-				        sourceNode.data.menuId = 옮기는 대상의 menuId(pk)
-				        */
-				        //const sourceNode = treeList.getNodeByKey(e.itemData.menuId);
-				        /*
-				        targetNode.data.uprMenuId = target 노드의 부모의 아이디
-				        targetNode.data.sort
-				        targetNode.data.menuId
-				        */
-				        //let targetNode = visibleRows[e.toIndex].node;
-						
-						
-						
-						//console.log('targetNode.parent:'+Object.keys(targetNode));
-						//console.log('targetNode의 부모id:'+targetNode.data.uprMenuId);
-						//console.log('targetNode의 parent.id:'+targetNode.parent.data.menuId);
-						//console.log('targetNode의 parent.parent.id:'+targetNode.parent.data.uprMenuId);
-						
-						//console.log('targetNode의 sort:'+targetNode.data.sort);
-						//console.log('targetNode의 id:'+targetNode.data.menuId);
-						
-/*				        while (targetNode && targetNode.data) {
-				          if (targetNode.data.menuId === sourceNode.data.menuId) {
-				            e.cancel = true;
-				            break;
-				          }
-				          targetNode = targetNode.parent;
-				        }	*/				
-						
-						
-						//e
-/*						console.log("❤❤❤❤❤❤❤❤❤❤❤❤❤❤");
-						console.log('self:'+self);
-						console.log('e.fromIndex:'+e.fromIndex);
-						console.log('e.toIndex:'+e.toIndex);
-						console.log('e.fromComponent:'+e.fromComponent);
-						console.log('e.toComponent:'+e.toComponent);
-						console.log('e.fromData:'+e.fromData);
-						console.log('e.toData:'+e.toData);
-						console.log('visibleRows:'+visibleRows);
-						console.log("❤❤❤❤❤❤❤❤❤❤❤❤❤❤");*/
-						
-						
-					//},*/
-					
 				    onReorder(e){
-						console.log("===="+Object.keys(e));
-						console.log("이게 되는가"+e.dropInsideItem);
 						const visibleRows = treeList.getVisibleRows();
-				        /*
-				        sourceNode.data.uprMenuId = 부모의 아이디
-				        sourceNode.data.sort = 기존 sort 순번
-				        sourceNode.data.menuId = 옮기는 대상의 menuId(pk)
-				        */
 				        var sourceNode = visibleRows[e.fromIndex].node;
-				        /*
-				        targetNode.data.uprMenuId = target 노드의 부모의 아이디
-				        targetNode.data.sort
-				        targetNode.data.menuId
-				        */
 				        var targetNode = visibleRows[e.toIndex].node;
 				        var targetUpNode = visibleRows[e.toIndex-1].node;
-				        
-				        
-				        console.log(Object.keys(sourceNode));
-				        //sourceNode.data.uprMenuId
-				        //sourceNode.data.sort
-				        
-				        //dropInsideItem: true일 때
-						console.log('targetNode의 부모id:'+targetNode.data.uprMenuId);
-						console.log('targetNode의 sort:'+targetNode.data.sort);
-						console.log('targetNode의 id:'+targetNode.data.menuId);
-
-						//dropInsideItem: false일 때
-						console.log('targetUpNode의 id:'+targetUpNode.data.uprMenuId);
-						console.log('targetUpNode의 id:'+targetUpNode.data.sort);
-						console.log('targetUpNode의 id:'+targetUpNode.data.menuId);
+				        var sourceNodeInfo = sourceNode.data;
+						/*
+						안에 넣을 경우 
+						기존과 부모가 다를 경우 return false 
+						/ 같을 경우 구분해서 다를 경우에만 아래 사항 적용
 						
-						
+							targetNode.data.menuId != sourceNode.data.uprMenuId
+							
+							sort은 기존 uprMenuId를 가진 menu들 중 제일 마지막.
+							desc로 정렬해서 조회하고 +1 부여하기
+							
+							sort은 그냥 기존 target의 sort를 가져다 쓰고, 
+							해당 sort보다 큰 sort를 가진 같은 uprMenuId 값인 애들을 전부 sort 재정의.
+						*/
 						if(e.dropInsideItem){
-							console.log('targetNode의 부모id:'+sourceNode.data.uprMenuId);
-							sourceNode.data.uprMenuId = targetNode.data.menuId;
-							console.log('targetNode의 부모id (after):'+sourceNode.data.uprMenuId);
-							console.log('before:'+sourceNode.data.sort);
-							sourceNode.data.sort = targetNode.data.sort;
-							console.log('after:'+sourceNode.data.sort);
-							//그리고 targetNode랑 sourceNode랑 sort을... 대대적으로 수정해줘야 하는데...
-							sourceNode.data.menuId //를 이용하기
-							
+							if(targetNode.data.menuId != sourceNode.data.uprMenuId){
+								//targetNode(부모)의 자식 갯수로 sort 정하기. (마지막으로 넣기)
+								//이 때 useYn = "Y" 인 애들만 보이기 때문에... N까지 고려할 수 없음 여기서는
+								sourceNode.data.sort = targetNode.children.length+1;
+								sourceNode.data.uprMenuId = targetNode.data.menuId;
+							}
+							else return false;
 						}
-						else{
-							sourceNode.data.uprMenuId = targetNode.data.uprMenuId;
-							//target딴
-							//이게 아니라 기존 sort를 받고, 기존 menuId의 sort+=를 가진 애들 sort를 +1해줘야 함
+						/* 
+						노드 사이에 넣을 경우
+							targetNode는 바로 아래의 node를 가져온다
 							
-							//source딴
-							//uprMenuId 하위의 sort들을 전체 개수 가져와서 asc로 정렬하고 sort 전부 새로 부여하기 
-							sourceNode.data.sort = targetNode.data.sort-1;
-							console.log("댕댕댕댕:"+sourceNode.data.sort);
-							console.log("댕댕댕댕:"+targetNode.data.sort);
+							만약 targetNode.data.uprMenuId != targetUpNode.data.uprMenuId 이면
+							targetUpNode의 uprMenuId 하위로 들어간 것.
 							
-						}
+							targetUpNode.parent.expanded 인지 확인해서 맞다면 
+							targetUpNode.parent.parent.menuId를 sourceNode.data.uprMenuId로 사용하기
 						
+						*/
+						else{
+							if(sourceNode.data.uprMenuId == targetUpNode.data.uprMenuId){
+								sourceNode.data.sort = targetUpNode.data.sort;
+							}
+							else if(targetNode.data.uprMenuId != targetUpNode.data.uprMenuId){
+								sourceNode.data.uprMenuId = targetNode.data.uprMenuId;
+								// targetNode가 
+								sourceNode.data.sort = targetNode.data.sort;
+							}
+							else{
+								//target--기존 sort를 받고, 기존 menuId의 sort+=를 가진 애들 sort를 +1해줘야 함
+								sourceNode.data.uprMenuId = targetNode.data.uprMenuId;
+								
+								//source--uprMenuId 하위의 sort들을 전체 개수 가져와서 asc로 정렬하고 sort 전부 새로 부여하기 
+								sourceNode.data.sort = targetNode.data.sort;
+							}
+						}
+						var menuArr = {"sourceMenu":sourceNodeInfo, "targetMenu":sourceNode.data};
+						// 옮긴 친구의 기존 자리 + 옮긴 자리 sort 수정하기 ajax
+						MENU_CRUD_SUBMIT.sortMenu(JSON.stringify(menuArr));
 					},
 					onDragEnd(e){
 						
@@ -373,10 +335,13 @@ $(function () {
 					selectedRows = e;
 				},
 			}).dxTreeList('instance');
+			if(data != null){
+				treeList.option("onRowPrepared",MENU.onRowPrepared);
+			}
+			
 			return treeList;
 		},
 		makeTreeView: function(data, tagSelector, checkBoxStatus){
-			console.log("data:"+data);
 			var treeView = $(tagSelector).dxTreeView({
 			    items: data,
 			    noDataText: "데이터가🔔없습니다",
@@ -404,6 +369,12 @@ $(function () {
 				$(menu).appendTo(select);
 			});
 		}
+		, onRowPrepared: function(e){  
+         	if (e.rowType == 'data' && e.data.useYn == "N") {  
+	            e.rowElement[0].style.color = 'red';  
+            	e.rowElement[0].style.fontWeight = 'bold';
+            }
+        }
 	}
 
 	var MENU_CRUD_SUBMIT = {
@@ -413,7 +384,6 @@ $(function () {
 				type: 'post',
 /*				dataType: 'json',*/
 				success: function (data, status, xhr) {
-					console.log("🏮"+"data: "+data+", status: "+status+", xhr: "+xhr);
 					if(flag == 'treeList')
 						MENU.makeTreeList(data, tagSelector, checkBoxStatus);
 					else if(flag == 'treeView')
@@ -440,7 +410,7 @@ $(function () {
 				contentType: 'application/json',
 				success: function (data, status, xhr) {
 					console.log("🏮"+"data: "+data+", status: "+status+", xhr: "+xhr);
-					MENU_CRUD_SUBMIT.loadDataSource(ENV_VAL.MENUVIEW, "multiple", "treeList");
+					MENU_CRUD_SUBMIT.loadDataSource(ENV_VAL.MENULIST, "multiple", "treeList");
 					VIEW.sidebarInit();
 					alert('정상 입력되었습니다');
 					console.log('data: ' + data);
@@ -460,7 +430,7 @@ $(function () {
 /*				dataType: 'text',*/
 				contentType: 'application/json', //serializeObject
 				success: function (data, status, xhr) {
-					MENU_CRUD_SUBMIT.loadDataSource(ENV_VAL.MENUVIEW, "multiple", "treeList");
+					MENU_CRUD_SUBMIT.loadDataSource(ENV_VAL.MENULIST, "multiple", "treeList");
 					VIEW.sidebarInit();
 					alert('정상 수정되었습니다');
 					console.log('data: ' + data);
@@ -481,7 +451,7 @@ $(function () {
 /*				dataType: 'json',*/
 				contentType: "application/x-www-form-urlencoded; charset=UTF-8", //배열을 넘길 거라서
 				success: function (data, status, xhr) {
-					MENU_CRUD_SUBMIT.loadDataSource(ENV_VAL.MENUVIEW, "multiple", "treeList");
+					MENU_CRUD_SUBMIT.loadDataSource(ENV_VAL.MENULIST, "multiple", "treeList");
 					VIEW.sidebarInit();
 					alert('정상 삭제되었습니다');
 					console.log('data: ' + data);
@@ -493,6 +463,25 @@ $(function () {
 
 			});
 		}
+		, sortMenu: function(beforeAfterMenu){
+			$.ajax({
+				url: ENV_VAL.URL_SORT,
+				type: 'post',
+				data: beforeAfterMenu,
+				contentType: "application/json",
+				success: function (data, status, xhr) {
+					MENU_CRUD_SUBMIT.loadDataSource(ENV_VAL.MENULIST, "multiple", "treeList");
+					VIEW.sidebarInit();
+					//alert('정상 수정되었습니다');
+					console.log('data: ' + data);
+				},
+				error: function (request, status, error) {
+					alert('수정 중 에러');
+					console.log('request.status: ' + request.status + 'status: ' + status + 'error: ' + error);
+				}
+			});
+		}
+		
 		, validationAndSubmit: function (type) {
 			if ($(ENV_VAL.CRUD_FORM+' input[name='+ENV_VAL.COL_MENUNM+']').val() == '') {
 				alert('메뉴 이름을 입력하세요');

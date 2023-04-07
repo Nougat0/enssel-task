@@ -50,6 +50,30 @@ public class MemberRequestService {
 		return memberList;
 	}
 	
+	public /*List<UserIdToNmData>*/String findNmFromId(/* List<UserIdToNmData> memberInfoList */ String userId){
+//		QTestNougat0User qTestNougat0User = QTestNougat0User.testNougat0User;
+//		List<String> list = new ArrayList<>();
+//		BooleanBuilder builder = new BooleanBuilder();
+//		
+//		//default 조건 useYn = "Y"
+//		//builder.and(qTestNougat0User.useYn.eq("Y"));
+//		memberInfoList.forEach(memberInfo->list.add(memberInfo.getUserId()));
+//		builder.and(qTestNougat0User.userId.in(list));
+//		
+//		List<UserIdToNmData> resultList = jpaQueryFactory.select(
+//			Projections.constructor(UserIdToNmData.class, qTestNougat0User.userId, qTestNougat0User.userNm)	
+//		).from(qTestNougat0User).where(builder).fetch();
+//		return resultList;
+		QTestNougat0User qTestNougat0User = QTestNougat0User.testNougat0User;
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qTestNougat0User.userId.eq(userId));
+		String userNm = jpaQueryFactory
+				.select(Projections.constructor(String.class, qTestNougat0User.userNm))
+				.from(qTestNougat0User).where(builder).fetchOne();
+
+		return userNm;
+	}
+	
 	//허 프로님께서 알려주신 방법: between 함수 사용하기
 	public LocalDateTime convertFromTime(String a) {
 		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
